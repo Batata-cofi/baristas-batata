@@ -1,0 +1,3035 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Batata Cofi — Calibración</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #F5F0E8;
+  --bg2: #EDE8DC;
+  --bg3: #E2DBD0;
+  --card: #FDFAF5;
+  --ink: #1C1A15;
+  --ink2: #5C5848;
+  --ink3: #9C9484;
+  --accent: #C8521A;
+  --accent2: #E87340;
+  --gold: #B8962E;
+  --green: #3A6B3E;
+  --green-bg: #EBF3EC;
+  --warn: #8B6914;
+  --warn-bg: #FDF3D8;
+  --danger: #8B2020;
+  --danger-bg: #FDE8E8;
+  --border: rgba(28,26,21,0.12);
+  --border2: rgba(28,26,21,0.06);
+  --r: 12px;
+  --r-sm: 8px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html { font-size: 16px; }
+body { background: var(--bg); color: var(--ink); font-family: 'Instrument Sans', sans-serif; min-height: 100vh; overflow-x: hidden; }
+
+/* SCREENS */
+.screen { display: none; min-height: 100vh; flex-direction: column; }
+.screen.active { display: flex; }
+
+/* ── PANTALLA 0: BIENVENIDA ── */
+#screen-welcome {
+  background: var(--ink);
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+#screen-welcome::before {
+  content: '';
+  position: absolute;
+  width: 300px; height: 300px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(200,82,26,0.15) 0%, transparent 70%);
+  top: -80px; right: -80px;
+}
+#screen-welcome::after {
+  content: '';
+  position: absolute;
+  width: 200px; height: 200px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(184,150,46,0.1) 0%, transparent 70%);
+  bottom: -40px; left: -40px;
+}
+.welcome-logo {
+  font-family: 'DM Serif Display', serif;
+  font-size: 2.8rem;
+  color: var(--bg);
+  text-align: center;
+  line-height: 1.1;
+  margin-bottom: 0.4rem;
+  position: relative; z-index: 1;
+}
+.welcome-sub {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.7rem;
+  color: var(--ink3);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  text-align: center;
+  margin-bottom: 3rem;
+  position: relative; z-index: 1;
+}
+.welcome-prompt {
+  font-size: 0.8rem;
+  color: var(--ink3);
+  text-align: center;
+  margin-bottom: 1rem;
+  position: relative; z-index: 1;
+  letter-spacing: 0.05em;
+}
+.barista-btns { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 280px; position: relative; z-index: 1; }
+.barista-btn {
+  background: transparent;
+  border: 1px solid rgba(245,240,232,0.2);
+  border-radius: var(--r);
+  padding: 1.1rem 1.5rem;
+  color: var(--bg);
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.2s;
+  letter-spacing: 0.02em;
+}
+.barista-btn:hover, .barista-btn:active { background: rgba(245,240,232,0.08); border-color: rgba(245,240,232,0.4); }
+.barista-btn .shift {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--ink3);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.barista-btn-custom {
+  background: transparent;
+  border: none;
+  color: var(--ink3);
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 0.85rem;
+  cursor: pointer;
+  text-align: center;
+  padding: 0.5rem;
+  margin-top: 0.5rem;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ── HEADER ── */
+.app-header {
+  background: var(--ink);
+  padding: 1rem 1.25rem 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky; top: 0; z-index: 100;
+}
+.header-left { display: flex; flex-direction: column; gap: 2px; }
+.header-brand {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.15rem;
+  color: var(--bg);
+  line-height: 1;
+}
+.header-barista {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.62rem;
+  color: var(--accent2);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.header-right { display: flex; gap: 8px; align-items: center; }
+.icon-btn {
+  background: rgba(245,240,232,0.08);
+  border: none;
+  border-radius: 8px;
+  width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  color: var(--bg);
+  font-size: 1.1rem;
+  transition: background 0.15s;
+}
+.icon-btn:active { background: rgba(245,240,232,0.15); }
+
+/* ── NAV TABS ── */
+.nav-tabs {
+  display: flex;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  padding: 0 0.5rem;
+  position: sticky; top: 65px; z-index: 99;
+}
+.nav-tab {
+  flex: 1;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 0.75rem 0.5rem;
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--ink3);
+  cursor: pointer;
+  transition: all 0.15s;
+  letter-spacing: 0.02em;
+}
+.nav-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* ── CONTENIDO ── */
+.tab-content { display: none; flex: 1; padding: 1rem; flex-direction: column; gap: 1rem; overflow-y: auto; }
+.tab-content.active { display: flex; }
+
+/* ── CARDS ── */
+.card {
+  background: var(--card);
+  border-radius: var(--r);
+  border: 1px solid var(--border2);
+  overflow: hidden;
+}
+.card-header {
+  padding: 0.9rem 1rem 0.75rem;
+  border-bottom: 1px solid var(--border2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.card-title {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink3);
+}
+.card-body { padding: 1rem; }
+
+/* ── CAFÉ ACTIVO ── */
+.cafe-active-bar {
+  background: var(--ink);
+  border-radius: var(--r);
+  padding: 0.9rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.cafe-active-name {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.1rem;
+  color: var(--bg);
+  line-height: 1.2;
+}
+.cafe-active-meta {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--ink3);
+  letter-spacing: 0.08em;
+  margin-top: 3px;
+}
+.cafe-badge {
+  background: rgba(200,82,26,0.15);
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--accent2);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ── FORMULARIO DE SHOT ── */
+.form-section { display: flex; flex-direction: column; gap: 0.75rem; }
+.form-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  margin-bottom: 0.4rem;
+  display: block;
+}
+.scale-row { display: flex; gap: 6px; }
+.scale-item { flex: 1; text-align: center; }
+.scale-item label {
+  display: block;
+  font-size: 0.65rem;
+  color: var(--ink3);
+  margin-bottom: 4px;
+  font-family: 'DM Mono', monospace;
+}
+.scale-btns { display: flex; gap: 3px; justify-content: center; }
+.scale-btn {
+  width: 28px; height: 28px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--ink2);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: 'Instrument Sans', sans-serif;
+}
+.scale-btn.selected { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+
+.textura-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.textura-chip {
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 0.5rem 0.25rem;
+  text-align: center;
+  font-size: 0.72rem;
+  color: var(--ink2);
+  cursor: pointer;
+  background: var(--bg);
+  transition: all 0.15s;
+  font-family: 'Instrument Sans', sans-serif;
+}
+.textura-chip.selected { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.textura-chip.positive { border-color: rgba(58,107,62,0.3); }
+.textura-chip.positive.selected { background: var(--green); border-color: var(--green); }
+.textura-chip.negative { border-color: rgba(200,82,26,0.2); }
+.textura-chip.negative.selected { background: var(--accent); border-color: var(--accent); }
+
+.input-row { display: flex; gap: 8px; }
+.input-group { flex: 1; }
+.input-field {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 0.6rem 0.75rem;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.85rem;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.15s;
+}
+.input-field:focus { border-color: var(--accent); }
+.input-field::placeholder { color: var(--ink3); }
+
+.curva-selector { display: flex; gap: 6px; }
+.curva-btn {
+  flex: 1;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 0.6rem 0.25rem;
+  text-align: center;
+  font-size: 0.68rem;
+  color: var(--ink2);
+  cursor: pointer;
+  background: var(--bg);
+  transition: all 0.15s;
+  line-height: 1.3;
+  font-family: 'Instrument Sans', sans-serif;
+}
+.curva-btn.selected { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.curva-btn .curva-icon { font-size: 1rem; display: block; margin-bottom: 3px; }
+
+/* ── DIAGNÓSTICO ── */
+.diagnostico-box {
+  border-radius: var(--r-sm);
+  padding: 0.9rem 1rem;
+  border: 1px solid;
+  display: none;
+}
+.diagnostico-box.visible { display: block; }
+.diagnostico-box.ok { background: var(--green-bg); border-color: rgba(58,107,62,0.3); }
+.diagnostico-box.warn { background: var(--warn-bg); border-color: rgba(139,105,20,0.3); }
+.diagnostico-box.bad { background: var(--danger-bg); border-color: rgba(139,32,32,0.3); }
+.diag-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 0.4rem;
+}
+.diag-label.ok { color: var(--green); }
+.diag-label.warn { color: var(--warn); }
+.diag-label.bad { color: var(--danger); }
+.diag-text { font-size: 0.82rem; color: var(--ink2); line-height: 1.5; }
+.diag-action { font-size: 0.78rem; color: var(--ink3); margin-top: 0.4rem; font-style: italic; }
+
+.btn-primary {
+  width: 100%;
+  background: var(--accent);
+  border: none;
+  border-radius: var(--r-sm);
+  padding: 0.9rem;
+  color: #fff;
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+  letter-spacing: 0.02em;
+}
+.btn-primary:active { background: var(--accent2); transform: scale(0.98); }
+.btn-secondary {
+  width: 100%;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 0.75rem;
+  color: var(--ink2);
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btn-secondary:active { background: var(--bg2); }
+
+/* ── HISTORIAL ── */
+.hist-filters {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+}
+.hist-filters::-webkit-scrollbar { display: none; }
+.hist-filter-btn {
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 0.72rem;
+  background: var(--bg);
+  color: var(--ink2);
+  cursor: pointer;
+  font-family: 'Instrument Sans', sans-serif;
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+.hist-filter-btn.active { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+
+.hist-group-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  padding: 0.25rem 0;
+}
+.hist-shot {
+  background: var(--card);
+  border: 1px solid var(--border2);
+  border-radius: var(--r);
+  padding: 0.9rem 1rem;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+.hist-shot:active { border-color: var(--border); }
+.hist-shot-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.hist-barista {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+.hist-barista.sofi { background: rgba(200,82,26,0.12); color: var(--accent); }
+.hist-barista.cami { background: rgba(184,150,46,0.15); color: var(--gold); }
+.hist-barista.custom { background: rgba(58,107,62,0.12); color: var(--green); }
+.hist-time {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--ink3);
+}
+.hist-receta {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+.hist-val {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.hist-val-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.55rem;
+  color: var(--ink3);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.hist-val-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.85rem;
+  color: var(--ink);
+  font-weight: 500;
+}
+.hist-sensorial {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+.hist-pill {
+  font-size: 0.65rem;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-family: 'DM Mono', monospace;
+}
+.hist-pill.ok { background: var(--green-bg); color: var(--green); }
+.hist-pill.warn { background: var(--warn-bg); color: var(--warn); }
+.hist-pill.bad { background: var(--danger-bg); color: var(--danger); }
+.hist-textura {
+  font-size: 0.72rem;
+  color: var(--ink2);
+  font-style: italic;
+}
+.hist-decision {
+  font-size: 0.75rem;
+  color: var(--ink3);
+  padding-top: 6px;
+  border-top: 1px solid var(--border2);
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+/* ── COMPARATIVA ── */
+.compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.compare-card {
+  background: var(--card);
+  border: 1px solid var(--border2);
+  border-radius: var(--r);
+  padding: 0.9rem;
+  text-align: center;
+}
+.compare-who {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 0.75rem;
+}
+.compare-who.sofi { color: var(--accent); }
+.compare-who.cami { color: var(--gold); }
+.compare-metric {
+  margin-bottom: 0.6rem;
+}
+.compare-metric-val {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.6rem;
+  color: var(--ink);
+  line-height: 1;
+}
+.compare-metric-label {
+  font-size: 0.62rem;
+  color: var(--ink3);
+  font-family: 'DM Mono', monospace;
+  letter-spacing: 0.06em;
+}
+
+.mini-curva {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 4px;
+  height: 40px;
+  margin: 0.5rem 0;
+}
+.mini-bar {
+  width: 18px;
+  border-radius: 3px 3px 0 0;
+  transition: height 0.3s;
+}
+.mini-bar.acid { background: var(--accent2); }
+.mini-bar.sweet { background: var(--gold); }
+.mini-bar.post { background: var(--green); }
+.mini-bar-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.5rem;
+  color: var(--ink3);
+  text-align: center;
+}
+
+/* ── EMPTY STATE ── */
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--ink3);
+}
+.empty-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+.empty-text { font-size: 0.85rem; line-height: 1.5; }
+
+/* ── MODAL ── */
+.modal-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(28,26,21,0.6);
+  z-index: 200;
+  align-items: flex-end;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--card);
+  border-radius: 20px 20px 0 0;
+  padding: 1.25rem;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  animation: slideUp 0.25s ease;
+}
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.modal-handle {
+  width: 36px; height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  margin: 0 auto 1rem;
+}
+.modal-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+}
+
+/* ── CAFÉ SETUP ── */
+.cafe-list { display: flex; flex-direction: column; gap: 8px; }
+.cafe-item {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 0.85rem 1rem;
+  cursor: pointer;
+  transition: border-color 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.cafe-item:active { border-color: var(--accent); }
+.cafe-item-name { font-weight: 500; font-size: 0.9rem; }
+.cafe-item-meta { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--ink3); margin-top: 2px; }
+
+/* ── SUGERENCIAS ── */
+.sug-card {
+  background: var(--card);
+  border: 1px solid var(--border2);
+  border-radius: var(--r);
+  overflow: hidden;
+}
+.sug-header {
+  padding: 0.7rem 1rem 0.6rem;
+  border-bottom: 1px solid var(--border2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.sug-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink3);
+}
+.sug-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  padding: 2px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.sug-tag-mol { background: rgba(200,82,26,0.1); color: var(--accent); }
+.sug-tag-ratio { background: rgba(184,150,46,0.15); color: var(--gold); }
+.sug-tag-dist { background: rgba(58,107,62,0.12); color: var(--green); }
+.sug-body { padding: 0.9rem 1rem; display: flex; flex-direction: column; gap: 0.65rem; }
+.sug-accion {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.3;
+}
+.sug-argumento {
+  font-size: 0.8rem;
+  color: var(--ink2);
+  line-height: 1.55;
+}
+.sug-proyeccion {
+  background: var(--bg2);
+  border-radius: var(--r-sm);
+  padding: 0.65rem 0.85rem;
+}
+.sug-proy-title {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  margin-bottom: 0.5rem;
+}
+.sug-proy-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.sug-proy-item { text-align: center; }
+.sug-proy-val {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--ink);
+  line-height: 1;
+}
+.sug-proy-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.52rem;
+  color: var(--ink3);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+.sug-sensorial {
+  font-size: 0.78rem;
+  color: var(--ink2);
+  font-style: italic;
+  line-height: 1.4;
+  border-top: 1px solid var(--border2);
+  padding-top: 0.55rem;
+}
+.sug-apply-btn {
+  width: 100%;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 0.6rem;
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 0.8rem;
+  color: var(--ink2);
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-top: 0.25rem;
+}
+.sug-apply-btn:active { background: var(--ink); color: var(--bg); }
+
+/* misc */
+.divider { height: 1px; background: var(--border2); margin: 0.25rem 0; }
+.flex-between { display: flex; align-items: center; justify-content: space-between; }
+.text-mono-sm { font-family: 'DM Mono', monospace; font-size: 0.65rem; color: var(--ink3); letter-spacing: 0.08em; }
+
+/* ── CLIMA ── */
+.clima-iconos {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  width: 100%;
+}
+.clima-btn {
+  background: rgba(245,240,232,0.06);
+  border: 1px solid rgba(245,240,232,0.15);
+  border-radius: var(--r-sm);
+  padding: 0.75rem 0.5rem 0.6rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font-size: 1.6rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  color: var(--bg);
+}
+.clima-btn span {
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 0.65rem;
+  color: rgba(245,240,232,0.5);
+  letter-spacing: 0.04em;
+}
+.clima-btn.selected {
+  background: rgba(245,240,232,0.15);
+  border-color: rgba(245,240,232,0.5);
+}
+.clima-btn.selected span { color: rgba(245,240,232,0.85); }
+/* Modal clima uses card colors */
+#clima-iconos-modal .clima-btn {
+  background: var(--bg);
+  border-color: var(--border);
+  color: var(--ink);
+}
+#clima-iconos-modal .clima-btn span { color: var(--ink3); }
+#clima-iconos-modal .clima-btn.selected {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--bg);
+}
+#clima-iconos-modal .clima-btn.selected span { color: rgba(245,240,232,0.7); }
+/* Star button active */
+#star-btn.active { opacity: 1 !important; }
+
+/* ── AI CARD ── */
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+.ai-section-title {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent2);
+  margin-bottom: 0.4rem;
+}
+.ai-section-body {
+  font-size: 0.82rem;
+  color: rgba(245,240,232,0.85);
+  line-height: 1.65;
+}
+.ai-receta-box {
+  background: rgba(245,240,232,0.06);
+  border: 1px solid rgba(245,240,232,0.12);
+  border-radius: var(--r-sm);
+  padding: 0.7rem 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.ai-receta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.ai-receta-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  color: rgba(245,240,232,0.4);
+  letter-spacing: 0.06em;
+}
+.ai-receta-val {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.78rem;
+  color: rgba(245,240,232,0.9);
+  font-weight: 500;
+}
+.ai-receta-val.highlight { color: var(--accent2); }
+
+/* ── ANÁLISIS ── */
+.protocolo-paso {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  padding: 0.75rem;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border2);
+  background: var(--bg);
+}
+.paso-num {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.4rem;
+  color: var(--ink3);
+  line-height: 1;
+  min-width: 24px;
+  text-align: center;
+}
+.paso-num.urgente { color: var(--accent); }
+.paso-body { flex: 1; }
+.paso-titulo {
+  font-weight: 600;
+  font-size: 0.88rem;
+  color: var(--ink);
+  margin-bottom: 4px;
+  line-height: 1.3;
+}
+.paso-desc {
+  font-size: 0.78rem;
+  color: var(--ink2);
+  line-height: 1.5;
+}
+.paso-meta {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--ink3);
+  letter-spacing: 0.06em;
+  margin-top: 4px;
+}
+.patron-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--border2);
+}
+.patron-label { font-size: 0.82rem; color: var(--ink2); }
+.patron-val { font-family: 'DM Mono', monospace; font-size: 0.78rem; color: var(--ink); }
+.tueste-zona {
+  padding: 0.85rem 1rem;
+  border-radius: var(--r-sm);
+  border-left: 3px solid;
+  margin-bottom: 0.5rem;
+}
+.tueste-zona-titulo {
+  font-weight: 600;
+  font-size: 0.88rem;
+  margin-bottom: 4px;
+}
+.tueste-zona-desc {
+  font-size: 0.78rem;
+  color: var(--ink2);
+  line-height: 1.55;
+}
+</style>
+</head>
+<body>
+
+<!-- ══ PANTALLA BIENVENIDA ══ -->
+<div id="screen-welcome" class="screen active">
+  <div class="welcome-logo">Batata<br>Cofi</div>
+  <div class="welcome-sub">Sistema de calibración</div>
+
+  <div id="step-barista">
+    <div class="welcome-prompt">¿Quién está en barra?</div>
+    <div class="barista-btns">
+      <button class="barista-btn" onclick="selectBaristaPre('Sofi','sofi','Turno mañana')">
+        <span>Sofi</span><span class="shift">Mañana</span>
+      </button>
+      <button class="barista-btn" onclick="selectBaristaPre('Cami','cami','Turno tarde')">
+        <span>Cami</span><span class="shift">Tarde</span>
+      </button>
+      <button class="barista-btn-custom" onclick="promptCustomBaristaPre()">+ otra persona</button>
+    </div>
+  </div>
+
+  <div id="step-clima" style="display:none;width:100%;max-width:320px;position:relative;z-index:1">
+    <div class="welcome-prompt" id="clima-greeting">Buenos días</div>
+    <div style="font-size:0.75rem;color:var(--ink3);text-align:center;margin-bottom:1.5rem;letter-spacing:0.04em">¿Cómo está el clima hoy?</div>
+    <div class="clima-iconos" id="clima-iconos">
+      <button class="clima-btn" data-clima="☀️" data-label="Soleado" onclick="setClima(this)">☀️<span>Soleado</span></button>
+      <button class="clima-btn" data-clima="⛅" data-label="Nublado" onclick="setClima(this)">⛅<span>Nublado</span></button>
+      <button class="clima-btn" data-clima="🌧️" data-label="Lluvia" onclick="setClima(this)">🌧️<span>Lluvia</span></button>
+      <button class="clima-btn" data-clima="🌫️" data-label="Húmedo" onclick="setClima(this)">🌫️<span>Húmedo</span></button>
+      <button class="clima-btn" data-clima="❄️" data-label="Frío" onclick="setClima(this)">❄️<span>Frío</span></button>
+      <button class="clima-btn" data-clima="🔥" data-label="Calor" onclick="setClima(this)">🔥<span>Calor</span></button>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:1rem">
+      <div style="flex:1">
+        <div style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--ink3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px;text-align:center">Temp °C</div>
+        <input class="input-field" id="clima-temp" type="number" placeholder="ej. 18" style="text-align:center">
+      </div>
+      <div style="flex:1">
+        <div style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--ink3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px;text-align:center">Humedad %</div>
+        <input class="input-field" id="clima-hum" type="number" placeholder="ej. 65" style="text-align:center">
+      </div>
+    </div>
+    <button class="barista-btn" style="margin-top:1.25rem;width:100%;justify-content:center" onclick="confirmarClima()">Entrar al turno →</button>
+    <button class="barista-btn-custom" onclick="confirmarClima()">Saltar clima</button>
+  </div>
+</div>
+
+<!-- ══ PANTALLA PRINCIPAL ══ -->
+<div id="screen-main" class="screen">
+
+  <div class="app-header">
+    <div class="header-left">
+      <div class="header-brand">Batata Cofi</div>
+      <div class="header-barista" id="header-barista-name">—</div>
+    </div>
+    <div class="header-right">
+      <button class="icon-btn" id="clima-header-btn" onclick="openClimaModal()" title="Clima del turno" style="font-size:1.2rem">—</button>
+      <button class="icon-btn" onclick="openCafeModal()" title="Cambiar café">☕</button>
+      <button class="icon-btn" onclick="switchBarista()" title="Cambiar barista">↩</button>
+    </div>
+  </div>
+
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showTab('calibrar')">Calibrar</button>
+    <button class="nav-tab" onclick="showTab('cata')">Cata</button>
+    <button class="nav-tab" onclick="showTab('historial')">Historial</button>
+    <button class="nav-tab" onclick="showTab('comparar')">M / T</button>
+    <button class="nav-tab" onclick="showTab('analisis')">Análisis</button>
+  </div>
+
+  <!-- ── TAB: CALIBRAR ── -->
+  <div id="tab-calibrar" class="tab-content active">
+
+    <!-- Café activo -->
+    <div class="cafe-active-bar" onclick="openCafeModal()">
+      <div>
+        <div class="cafe-active-name" id="cafe-active-name">Sin café seleccionado</div>
+        <div class="cafe-active-meta" id="cafe-active-meta">Tocá para seleccionar</div>
+      </div>
+      <div class="cafe-badge" id="cafe-active-days">—</div>
+    </div>
+
+    <!-- Cata referencia banner -->
+    <div id="cata-referencia-banner" style="display:none;background:color-mix(in srgb,var(--gold) 10%,var(--card));border:1px solid rgba(184,150,46,0.25);border-radius:var(--r);overflow:hidden">
+      <div style="padding:0.7rem 1rem 0.6rem;border-bottom:1px solid rgba(184,150,46,0.15);display:flex;align-items:center;justify-content:space-between">
+        <span style="font-family:'DM Mono',monospace;font-size:0.58rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold)">Cata de referencia · esta semana</span>
+        <button onclick="showTab('cata')" style="background:none;border:none;font-family:'DM Mono',monospace;font-size:0.58rem;color:var(--gold);cursor:pointer;letter-spacing:0.06em;text-decoration:underline;text-underline-offset:2px">ver →</button>
+      </div>
+      <div style="padding:0.75rem 1rem;display:flex;flex-direction:column;gap:0.5rem">
+        <div style="display:flex;align-items:flex-end;gap:6px" id="cata-ref-curva-mini"></div>
+        <div style="font-size:0.78rem;color:var(--ink2);line-height:1.5" id="cata-ref-guia"></div>
+      </div>
+    </div>
+
+    <!-- Shot N° -->
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:0 0.25rem;">
+      <span class="text-mono-sm">SHOT DEL DÍA</span>
+      <span class="text-mono-sm" id="shot-counter">0 registrado(s)</span>
+    </div>
+
+    <!-- Sensorial -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Perfil sensorial</span>
+        <span class="text-mono-sm">escala 1–3</span>
+      </div>
+      <div class="card-body">
+        <div class="form-section">
+          <div class="scale-row">
+            <div class="scale-item">
+              <label>Acidez</label>
+              <div class="scale-btns" id="scale-acidez">
+                <button class="scale-btn" data-val="1" onclick="setScale('acidez',1)">1</button>
+                <button class="scale-btn" data-val="2" onclick="setScale('acidez',2)">2</button>
+                <button class="scale-btn" data-val="3" onclick="setScale('acidez',3)">3</button>
+              </div>
+            </div>
+            <div class="scale-item">
+              <label>Dulzor</label>
+              <div class="scale-btns" id="scale-dulzor">
+                <button class="scale-btn" data-val="1" onclick="setScale('dulzor',1)">1</button>
+                <button class="scale-btn" data-val="2" onclick="setScale('dulzor',2)">2</button>
+                <button class="scale-btn" data-val="3" onclick="setScale('dulzor',3)">3</button>
+              </div>
+            </div>
+            <div class="scale-item">
+              <label>Posgusto</label>
+              <div class="scale-btns" id="scale-posgusto">
+                <button class="scale-btn" data-val="1" onclick="setScale('posgusto',1)">1</button>
+                <button class="scale-btn" data-val="2" onclick="setScale('posgusto',2)">2</button>
+                <button class="scale-btn" data-val="3" onclick="setScale('posgusto',3)">3</button>
+              </div>
+            </div>
+            <div class="scale-item">
+              <label>Cuerpo</label>
+              <div class="scale-btns" id="scale-cuerpo">
+                <button class="scale-btn" data-val="1" onclick="setScale('cuerpo',1)">1</button>
+                <button class="scale-btn" data-val="2" onclick="setScale('cuerpo',2)">2</button>
+                <button class="scale-btn" data-val="3" onclick="setScale('cuerpo',3)">3</button>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <span class="form-label">Curva de balance</span>
+            <div class="curva-selector">
+              <button class="curva-btn" id="curva-plana" onclick="setCurva('plana')">
+                <span class="curva-icon">〰</span>Plana
+              </button>
+              <button class="curva-btn" id="curva-parabola" onclick="setCurva('parabola')">
+                <span class="curva-icon">∩</span>Parábola ✓
+              </button>
+              <button class="curva-btn" id="curva-invertida" onclick="setCurva('invertida')">
+                <span class="curva-icon">∨</span>Invertida
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <span class="form-label">Textura en lengua</span>
+            <div class="textura-grid">
+              <button class="textura-chip positive" onclick="setTextura('Sedoso')">Sedoso</button>
+              <button class="textura-chip positive" onclick="setTextura('Aterciopelado')">Aterciopelado</button>
+              <button class="textura-chip positive" onclick="setTextura('Cremoso')">Cremoso</button>
+              <button class="textura-chip negative" onclick="setTextura('Áspero')">Áspero</button>
+              <button class="textura-chip negative" onclick="setTextura('Astringente')">Astringente</button>
+              <button class="textura-chip negative" onclick="setTextura('Seco')">Seco</button>
+              <button class="textura-chip negative" onclick="setTextura('Acuoso')">Acuoso</button>
+              <button class="textura-chip negative" onclick="setTextura('Corrosivo')">Corrosivo</button>
+              <button class="textura-chip negative" onclick="setTextura('Arenoso')">Arenoso</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Receta -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Receta</span>
+        <span class="text-mono-sm" id="ratio-display">ratio —</span>
+      </div>
+      <div class="card-body">
+        <div class="form-section">
+          <div class="input-row">
+            <div class="input-group">
+              <span class="form-label">Dosis (g)</span>
+              <input class="input-field" type="number" step="0.1" id="inp-dosis" placeholder="ej. 18" value="18" oninput="updateRatioDisplay();updateSugerencias()">
+            </div>
+            <div class="input-group">
+              <span class="form-label">Rendimiento (g)</span>
+              <input class="input-field" type="number" step="1" id="inp-rendimiento" placeholder="ej. 40" oninput="updateRatioDisplay();updateSugerencias()">
+            </div>
+            <div class="input-group">
+              <span class="form-label">Tiempo (s)</span>
+              <input class="input-field" type="number" step="1" id="inp-tiempo" placeholder="ej. 31" oninput="updateSugerencias()">
+            </div>
+          </div>
+          <div class="input-row">
+            <div class="input-group">
+              <span class="form-label">Molienda</span>
+              <input class="input-field" type="number" step="0.1" id="inp-molienda" placeholder="ej. 1.5" oninput="updateSugerencias()">
+            </div>
+            <div class="input-group">
+              <span class="form-label">TDS %</span>
+              <input class="input-field" type="number" step="0.01" id="inp-tds" placeholder="ej. 9.97" oninput="updateSugerencias()">
+            </div>
+            <div class="input-group">
+              <span class="form-label">Extracción %</span>
+              <input class="input-field" type="number" step="0.01" id="inp-extraccion" placeholder="ej. 22.1" oninput="updateSugerencias()">
+            </div>
+          </div>
+          <!-- Fila opcional: temp / presion / reposo -->
+          <div style="display:flex;align-items:center;gap:6px;margin-top:2px">
+            <button type="button" id="toggle-extra-fields" onclick="toggleExtraFields()" style="background:none;border:none;font-family:'DM Mono',monospace;font-size:0.58rem;color:var(--ink3);letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;padding:2px 0;display:flex;align-items:center;gap:4px">
+              <span id="extra-fields-arrow">▸</span> Temperatura · Presión · Reposo
+            </button>
+          </div>
+          <div id="extra-fields" style="display:none;flex-direction:column;gap:8px">
+            <div class="input-row">
+              <div class="input-group">
+                <span class="form-label">Temp. agua °C</span>
+                <input class="input-field" type="number" step="0.1" id="inp-temp" placeholder="ej. 93">
+              </div>
+              <div class="input-group">
+                <span class="form-label">Presión (bar)</span>
+                <input class="input-field" type="number" step="0.5" id="inp-presion" placeholder="ej. 9">
+              </div>
+              <div class="input-group">
+                <span class="form-label">Días reposo</span>
+                <input class="input-field" type="number" step="1" id="inp-reposo" placeholder="ej. 14" oninput="updateReposoIndicador()">
+              </div>
+            </div>
+            <div id="reposo-indicador" style="display:none;border-radius:var(--r-sm);padding:0.6rem 0.85rem;font-size:0.78rem;line-height:1.4"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Diagnóstico automático -->
+    <div id="diagnostico-box" class="diagnostico-box">
+      <div class="diag-label" id="diag-label">—</div>
+      <div class="diag-text" id="diag-text">—</div>
+      <div class="diag-action" id="diag-action">—</div>
+    </div>
+
+    <!-- Sugerencias -->
+    <div id="sugerencias-wrap" style="display:none;flex-direction:column;gap:8px">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:0 0.25rem">
+        <span class="text-mono-sm">PRÓXIMO PASO</span>
+        <button id="btn-ai-analisis" onclick="pedirAnalisisIA()" style="background:var(--ink);border:none;border-radius:6px;padding:3px 10px;font-family:'DM Mono',monospace;font-size:0.58rem;color:var(--bg);letter-spacing:0.08em;cursor:pointer;display:flex;align-items:center;gap:5px;transition:opacity 0.2s">
+          <span>✦</span><span id="btn-ai-label">Análisis experto</span>
+        </button>
+      </div>
+      <div id="sug-1" class="sug-card"></div>
+      <div id="sug-2" class="sug-card"></div>
+
+      <!-- AI Analysis card — hidden by default -->
+      <div id="ai-analisis-card" style="display:none;background:var(--ink);border-radius:var(--r);overflow:hidden">
+        <div style="padding:0.8rem 1rem 0.65rem;border-bottom:1px solid rgba(245,240,232,0.1);display:flex;align-items:center;justify-content:space-between">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:1rem">✦</span>
+            <span style="font-family:'DM Mono',monospace;font-size:0.6rem;color:rgba(245,240,232,0.6);letter-spacing:0.12em;text-transform:uppercase">Análisis experto</span>
+          </div>
+          <button onclick="cerrarAnalisisIA()" style="background:none;border:none;color:rgba(245,240,232,0.4);font-size:1.1rem;cursor:pointer;line-height:1">×</button>
+        </div>
+        <div id="ai-analisis-content" style="padding:1rem;font-size:0.82rem;color:rgba(245,240,232,0.85);line-height:1.65;min-height:80px">
+          <div id="ai-loading" style="display:flex;align-items:center;gap:8px;color:rgba(245,240,232,0.4)">
+            <span id="ai-loading-dot" style="display:inline-block;animation:pulse 1.2s infinite">●</span>
+            <span style="font-family:'DM Mono',monospace;font-size:0.65rem;letter-spacing:0.08em">Analizando el shot...</span>
+          </div>
+          <div id="ai-response" style="display:none;flex-direction:column;gap:0.85rem"></div>
+        </div>
+        <div id="ai-apply-row" style="display:none;padding:0 1rem 1rem">
+          <button onclick="aplicarDesdeIA()" style="width:100%;background:rgba(245,240,232,0.1);border:1px solid rgba(245,240,232,0.2);border-radius:var(--r-sm);padding:0.6rem;font-family:'Instrument Sans',sans-serif;font-size:0.8rem;color:rgba(245,240,232,0.8);cursor:pointer;transition:all 0.15s">
+            Copiar decisión al formulario →
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Decisión tomada -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Decisión tomada</span>
+      </div>
+      <div class="card-body" style="display:flex;flex-direction:column;gap:0.75rem">
+        <input class="input-field" type="text" id="inp-decision" placeholder="ej. Afiné molienda a 1.0, mejoró textura" style="width:100%">
+        <div>
+          <span class="form-label">Comentario libre</span>
+          <textarea class="input-field" id="inp-comentario" placeholder="Aromas, comparaciones, sensaciones, contexto del shot..." style="width:100%;resize:none;height:72px;line-height:1.5;font-family:'Instrument Sans',sans-serif;font-size:0.82rem"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Favorito -->
+    <button id="star-btn" onclick="toggleStar()" style="width:100%;background:var(--card);border:1px solid var(--border2);border-radius:var(--r-sm);padding:0.75rem 1rem;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:all 0.2s;font-family:'Instrument Sans',sans-serif;font-size:0.85rem;color:var(--ink2)">
+      <span id="star-label">Marcar como receta favorita</span>
+      <span id="star-icon" style="font-size:1.4rem;transition:all 0.2s;opacity:0.3">☆</span>
+    </button>
+
+    <button class="btn-primary" onclick="guardarShot()">Registrar shot</button>
+    <div style="height:1rem"></div>
+  </div>
+
+  <!-- ── TAB: CATA SEMANAL ── -->
+  <div id="tab-cata" class="tab-content">
+
+    <div id="cata-cafe-info" class="cafe-active-bar" style="cursor:default">
+      <div>
+        <div class="cafe-active-name" id="cata-cafe-nombre">—</div>
+        <div class="cafe-active-meta" id="cata-cafe-meta">—</div>
+      </div>
+      <div class="cafe-badge" id="cata-cafe-dias">—</div>
+    </div>
+
+    <!-- Cata existente o formulario -->
+    <div id="cata-existente" style="display:none">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title" id="cata-semana-label">Cata de la semana</span>
+          <button onclick="editarCata()" style="background:none;border:none;font-size:0.75rem;color:var(--accent);cursor:pointer;font-family:'Instrument Sans',sans-serif">Editar</button>
+        </div>
+        <div class="card-body" style="display:flex;flex-direction:column;gap:1rem">
+          <!-- Curva visual -->
+          <div>
+            <div class="form-label" style="margin-bottom:0.75rem">Curva sensorial</div>
+            <div id="cata-curva-chart" style="display:flex;align-items:flex-end;gap:0;height:80px;border-bottom:1px solid var(--border);padding:0 1rem;position:relative">
+            </div>
+            <div style="display:flex;justify-content:space-around;padding:4px 1rem 0">
+              <span style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--ink3);letter-spacing:0.06em">ACIDEZ</span>
+              <span style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--ink3);letter-spacing:0.06em">DULZOR</span>
+              <span style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--ink3);letter-spacing:0.06em">POSGUSTO</span>
+            </div>
+          </div>
+          <!-- Valores -->
+          <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;text-align:center">
+            <div><div style="font-family:'DM Serif Display',serif;font-size:1.5rem" id="cv-acidez">—</div><div class="text-mono-sm">Acidez</div></div>
+            <div><div style="font-family:'DM Serif Display',serif;font-size:1.5rem" id="cv-dulzor">—</div><div class="text-mono-sm">Dulzor</div></div>
+            <div><div style="font-family:'DM Serif Display',serif;font-size:1.5rem" id="cv-posgusto">—</div><div class="text-mono-sm">Posgusto</div></div>
+            <div><div style="font-family:'DM Serif Display',serif;font-size:1.5rem" id="cv-cuerpo">—</div><div class="text-mono-sm">Cuerpo</div></div>
+            <div><div style="font-family:'DM Serif Display',serif;font-size:0.85rem;padding-top:4px" id="cv-textura">—</div><div class="text-mono-sm">Textura</div></div>
+          </div>
+          <!-- Notas -->
+          <div id="cv-notas-wrap" style="display:none;background:var(--bg2);border-radius:var(--r-sm);padding:0.75rem 1rem">
+            <div class="form-label" style="margin-bottom:4px">Notas</div>
+            <div id="cv-notas" style="font-size:0.82rem;color:var(--ink2);line-height:1.5"></div>
+          </div>
+          <!-- Semana -->
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <span class="text-mono-sm" id="cata-fecha-label">—</span>
+            <span class="text-mono-sm" id="cata-barista-label">—</span>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="background:color-mix(in srgb,var(--gold) 8%,var(--card))">
+        <div class="card-body" style="font-size:0.82rem;color:var(--ink2);line-height:1.6">
+          <div style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--gold);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.4rem">Punto de partida para calibración</div>
+          <div id="cata-guia-text">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Formulario nueva cata -->
+    <div id="cata-form" style="display:flex;flex-direction:column;gap:1rem">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Nueva cata semanal</span>
+          <span class="text-mono-sm">cupping clásico</span>
+        </div>
+        <div class="card-body">
+          <div class="form-section">
+            <div>
+              <span class="form-label">Perfil sensorial (1–3)</span>
+              <div class="scale-row">
+                <div class="scale-item">
+                  <label>Acidez</label>
+                  <div class="scale-btns" id="cata-scale-acidez">
+                    <button class="scale-btn" onclick="setCataScale('acidez',1)">1</button>
+                    <button class="scale-btn" onclick="setCataScale('acidez',2)">2</button>
+                    <button class="scale-btn" onclick="setCataScale('acidez',3)">3</button>
+                  </div>
+                </div>
+                <div class="scale-item">
+                  <label>Dulzor</label>
+                  <div class="scale-btns" id="cata-scale-dulzor">
+                    <button class="scale-btn" onclick="setCataScale('dulzor',1)">1</button>
+                    <button class="scale-btn" onclick="setCataScale('dulzor',2)">2</button>
+                    <button class="scale-btn" onclick="setCataScale('dulzor',3)">3</button>
+                  </div>
+                </div>
+                <div class="scale-item">
+                  <label>Posgusto</label>
+                  <div class="scale-btns" id="cata-scale-posgusto">
+                    <button class="scale-btn" onclick="setCataScale('posgusto',1)">1</button>
+                    <button class="scale-btn" onclick="setCataScale('posgusto',2)">2</button>
+                    <button class="scale-btn" onclick="setCataScale('posgusto',3)">3</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div>
+              <span class="form-label">Datos accesorios</span>
+              <div class="scale-row" style="gap:8px">
+                <div class="scale-item">
+                  <label>Cuerpo</label>
+                  <div class="scale-btns" id="cata-scale-cuerpo">
+                    <button class="scale-btn" onclick="setCataScale('cuerpo',1)">1</button>
+                    <button class="scale-btn" onclick="setCataScale('cuerpo',2)">2</button>
+                    <button class="scale-btn" onclick="setCataScale('cuerpo',3)">3</button>
+                  </div>
+                </div>
+                <div class="scale-item" style="flex:2">
+                  <label>Textura</label>
+                  <input class="input-field" id="cata-textura" type="text" placeholder="ej. sedoso, áspero" style="width:100%">
+                </div>
+              </div>
+            </div>
+            <div>
+              <span class="form-label">Notas (opcional)</span>
+              <input class="input-field" id="cata-notas" type="text" placeholder="descriptores, comparaciones, observaciones" style="width:100%">
+            </div>
+            <!-- Preview curva -->
+            <div id="cata-preview-wrap" style="display:none">
+              <span class="form-label">Curva de balance</span>
+              <div id="cata-preview-chart" style="display:flex;align-items:flex-end;gap:0;height:60px;border-bottom:1px solid var(--border);padding:0 1rem"></div>
+              <div style="display:flex;justify-content:space-around;padding:4px 1rem 0">
+                <span style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--ink3)">ACIDEZ</span>
+                <span style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--ink3)">DULZOR</span>
+                <span style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--ink3)">POSGUSTO</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="guardarCata()">Guardar cata de la semana</button>
+      <div style="height:0.5rem"></div>
+    </div>
+
+  </div>
+
+  <!-- ── TAB: HISTORIAL ── -->
+  <div id="tab-historial" class="tab-content">
+    <div class="hist-filters" id="hist-filters">
+      <button class="hist-filter-btn active" onclick="filterHist('all',this)">Todos</button>
+      <button class="hist-filter-btn" onclick="filterHist('favoritos',this)">⭐ Favoritos</button>
+      <button class="hist-filter-btn" onclick="filterHist('Sofi',this)">Sofi</button>
+      <button class="hist-filter-btn" onclick="filterHist('Cami',this)">Cami</button>
+      <button class="hist-filter-btn" onclick="filterHist('☀️',this)">☀️</button>
+      <button class="hist-filter-btn" onclick="filterHist('⛅',this)">⛅</button>
+      <button class="hist-filter-btn" onclick="filterHist('🌧️',this)">🌧️</button>
+      <button class="hist-filter-btn" onclick="filterHist('🌫️',this)">🌫️</button>
+      <button class="hist-filter-btn" onclick="filterHist('❄️',this)">❄️</button>
+      <button class="hist-filter-btn" onclick="filterHist('🔥',this)">🔥</button>
+    </div>
+    <div id="hist-list"></div>
+  </div>
+
+  <!-- ── TAB: COMPARATIVA ── -->
+  <div id="tab-comparar" class="tab-content">
+    <div class="card">
+      <div class="card-header"><span class="card-title">Promedio del día</span></div>
+      <div class="card-body">
+        <div class="compare-grid">
+          <div class="compare-card">
+            <div class="compare-who sofi">Sofi · Mañana</div>
+            <div class="mini-curva" id="curva-sofi"></div>
+            <div style="display:flex;justify-content:center;gap:8px;margin-bottom:0.75rem">
+              <div class="mini-bar-label"><span class="mini-bar acid" style="display:inline-block;width:8px;height:8px;border-radius:2px"></span> Acid</div>
+              <div class="mini-bar-label"><span class="mini-bar sweet" style="display:inline-block;width:8px;height:8px;border-radius:2px"></span> Dulz</div>
+              <div class="mini-bar-label"><span class="mini-bar post" style="display:inline-block;width:8px;height:8px;border-radius:2px"></span> Post</div>
+            </div>
+            <div id="stats-sofi" class="compare-metric"><div class="compare-metric-val">—</div><div class="compare-metric-label">shots hoy</div></div>
+          </div>
+          <div class="compare-card">
+            <div class="compare-who cami">Cami · Tarde</div>
+            <div class="mini-curva" id="curva-cami"></div>
+            <div style="display:flex;justify-content:center;gap:8px;margin-bottom:0.75rem">
+              <div class="mini-bar-label"><span class="mini-bar acid" style="display:inline-block;width:8px;height:8px;border-radius:2px"></span> Acid</div>
+              <div class="mini-bar-label"><span class="mini-bar sweet" style="display:inline-block;width:8px;height:8px;border-radius:2px"></span> Dulz</div>
+              <div class="mini-bar-label"><span class="mini-bar post" style="display:inline-block;width:8px;height:8px;border-radius:2px"></span> Post</div>
+            </div>
+            <div id="stats-cami" class="compare-metric"><div class="compare-metric-val">—</div><div class="compare-metric-label">shots hoy</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="card-title">Texturas más frecuentes hoy</span></div>
+      <div class="card-body" id="texturas-compare">
+        <div class="empty-state"><div class="empty-text">Sin datos aún</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="card-title">Decisiones tomadas hoy</span></div>
+      <div class="card-body" id="decisiones-compare">
+        <div class="empty-state"><div class="empty-text">Sin datos aún</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TAB: ANÁLISIS ── -->
+  <div id="tab-analisis" class="tab-content">
+
+    <!-- Header café + días -->
+    <div id="analisis-cafe-bar" class="cafe-active-bar" style="cursor:default">
+      <div>
+        <div class="cafe-active-name" id="analisis-cafe-nombre">—</div>
+        <div class="cafe-active-meta" id="analisis-cafe-meta">—</div>
+      </div>
+      <div id="analisis-reposo-badge" class="cafe-badge" style="min-width:64px;text-align:center">—</div>
+    </div>
+
+    <!-- Guía de días de tueste -->
+    <div id="analisis-tueste-guia" class="card"></div>
+
+    <!-- Protocolo de diagnóstico -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Protocolo · ¿Por dónde empezar?</span>
+      </div>
+      <div class="card-body" style="display:flex;flex-direction:column;gap:0.85rem">
+        <div style="font-size:0.8rem;color:var(--ink2);line-height:1.55" id="analisis-protocolo-intro"></div>
+        <div id="analisis-protocolo-pasos" style="display:flex;flex-direction:column;gap:8px"></div>
+      </div>
+    </div>
+
+    <!-- Patrones históricos -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Patrones históricos</span>
+        <span class="text-mono-sm" id="analisis-total-shots">—</span>
+      </div>
+      <div class="card-body" style="display:flex;flex-direction:column;gap:1rem" id="analisis-patrones"></div>
+    </div>
+
+    <!-- Mejores shots -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Mejores shots registrados</span>
+        <span class="text-mono-sm">⭐ favoritos + logrados</span>
+      </div>
+      <div class="card-body" id="analisis-mejores">
+        <div class="empty-state"><div class="empty-text">Todavía no hay shots marcados como favoritos.</div></div>
+      </div>
+    </div>
+
+    <div style="height:1rem"></div>
+  </div>
+
+</div>
+
+<!-- ══ MODAL: SELECCIONAR CAFÉ ══ -->
+<div id="modal-cafe" class="modal-overlay" onclick="closeCafeModal(event)">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Seleccionar café</div>
+    <div class="cafe-list" id="cafe-list"></div>
+    <div style="margin-top:1rem">
+      <div style="margin-bottom:0.75rem">
+        <span class="form-label">Nuevo café</span>
+        <input class="input-field" type="text" id="new-cafe-nombre" placeholder="Colombia Lavado · Caturra" style="width:100%;margin-bottom:8px">
+        <div class="input-row">
+          <input class="input-field" type="text" id="new-cafe-proceso" placeholder="Proceso (lavado)">
+          <input class="input-field" type="date" id="new-cafe-tueste">
+        </div>
+      </div>
+      <button class="btn-primary" onclick="addCafe()" style="margin-bottom:8px">Agregar café</button>
+      <button class="btn-secondary" onclick="closeCafeModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: DETALLE SHOT ══ -->
+<div id="modal-shot" class="modal-overlay" onclick="closeShotModal(event)">
+  <div class="modal" id="modal-shot-content"></div>
+</div>
+
+<script>
+// ══ STATE ══
+let state = {
+  barista: null,
+  baristaKey: null,
+  cafeActivo: null,
+  cafes: [],
+  shots: [],
+  turnoClima: null,
+  form: { acidez:0, dulzor:0, posgusto:0, cuerpo:0, textura:null, curva:null, favorito:false }
+};
+
+const TODAY = new Date().toLocaleDateString('es-AR', {day:'2-digit',month:'2-digit',year:'numeric'});
+
+function save() { localStorage.setItem('batata_state', JSON.stringify({cafes:state.cafes,shots:state.shots,cafeActivo:state.cafeActivo,catas:state.catas||{}})); }
+function load() {
+  const d = localStorage.getItem('batata_state');
+  if (d) { const p = JSON.parse(d); state.cafes = p.cafes||[]; state.shots = p.shots||[]; state.cafeActivo = p.cafeActivo||null; state.catas = p.catas||{}; }
+  // Pre-cargar el café de hoy
+  if (!state.cafes.length) {
+    state.cafes = [{ id:'c1', nombre:'Colombia Lavado · Caturra/Castillo', proceso:'Lavado', tueste:'30/04/2026' }];
+    state.cafeActivo = 'c1';
+    save();
+  }
+}
+
+// ══ BARISTA ══
+function selectBarista(name, key, shift) {
+  state.barista = name; state.baristaKey = key;
+  document.getElementById('header-barista-name').textContent = name + ' · ' + shift;
+  document.getElementById('screen-welcome').classList.remove('active');
+  document.getElementById('screen-main').classList.add('active');
+  load(); updateCafeBar(); updateShotCounter(); renderHist(); renderComparativa(); updateCataReferencia();
+}
+function promptCustomBarista() {
+  const n = prompt('Nombre:');
+  if (n) selectBarista(n, 'custom', 'Turno');
+}
+function switchBarista() {
+  document.getElementById('screen-main').classList.remove('active');
+  document.getElementById('screen-welcome').classList.add('active');
+}
+
+// ══ TABS ══
+function showTab(tab) {
+  document.querySelectorAll('.nav-tab').forEach((t,i)=>{ t.classList.toggle('active', ['calibrar','cata','historial','comparar','analisis'][i]===tab); });
+  document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  if (tab==='historial') renderHist();
+  if (tab==='comparar') renderComparativa();
+  if (tab==='cata') renderCata();
+  if (tab==='analisis') renderAnalisis();
+}
+
+// ══ CAFÉ ══
+function updateCafeBar() {
+  const c = state.cafes.find(x=>x.id===state.cafeActivo);
+  if (c) {
+    document.getElementById('cafe-active-name').textContent = c.nombre;
+    document.getElementById('cafe-active-meta').textContent = c.proceso + ' · Tueste ' + c.tueste;
+    const days = calcDays(c.tueste);
+    document.getElementById('cafe-active-days').textContent = days > 0 ? days+'d de tueste' : '—';
+  } else {
+    document.getElementById('cafe-active-name').textContent = 'Sin café seleccionado';
+    document.getElementById('cafe-active-meta').textContent = 'Tocá para seleccionar';
+    document.getElementById('cafe-active-days').textContent = '—';
+  }
+}
+function calcDays(tueste) {
+  try {
+    const parts = tueste.split('/');
+    const d = new Date(parseInt(parts[2]), parseInt(parts[1])-1, parseInt(parts[0]));
+    return Math.floor((Date.now()-d.getTime())/(86400000));
+  } catch { return 0; }
+}
+function openCafeModal() {
+  const list = document.getElementById('cafe-list');
+  list.innerHTML = state.cafes.map(c=>`
+    <div class="cafe-item" onclick="selectCafe('${c.id}')">
+      <div>
+        <div class="cafe-item-name">${c.nombre}</div>
+        <div class="cafe-item-meta">${c.proceso} · Tueste ${c.tueste} · ${calcDays(c.tueste)}d</div>
+      </div>
+      ${state.cafeActivo===c.id?'<span style="color:var(--accent);font-size:1rem">●</span>':''}
+    </div>`).join('');
+  document.getElementById('modal-cafe').classList.add('open');
+}
+function closeCafeModal(e) { if (!e||e.target===document.getElementById('modal-cafe')) document.getElementById('modal-cafe').classList.remove('open'); }
+function selectCafe(id) { state.cafeActivo=id; save(); updateCafeBar(); closeCafeModal(); updateCataReferencia(); }
+function addCafe() {
+  const nombre = document.getElementById('new-cafe-nombre').value.trim();
+  const proceso = document.getElementById('new-cafe-proceso').value.trim();
+  const tuesteRaw = document.getElementById('new-cafe-tueste').value;
+  if (!nombre) return;
+  let tueste = '—';
+  if (tuesteRaw) { const d=new Date(tuesteRaw+'T12:00:00'); tueste=d.getDate().toString().padStart(2,'0')+'/'+(d.getMonth()+1).toString().padStart(2,'0')+'/'+d.getFullYear(); }
+  const cafe = { id:'c'+Date.now(), nombre, proceso:proceso||'—', tueste };
+  state.cafes.push(cafe); state.cafeActivo=cafe.id; save();
+  document.getElementById('new-cafe-nombre').value=''; document.getElementById('new-cafe-proceso').value=''; document.getElementById('new-cafe-tueste').value='';
+  closeCafeModal(); updateCafeBar(); openCafeModal();
+}
+
+// ══ FORMULARIO SENSORIAL ══
+function setScale(dim, val) {
+  state.form[dim] = val;
+  document.querySelectorAll(`#scale-${dim} .scale-btn`).forEach(b=>{ b.classList.toggle('selected', parseInt(b.dataset.val)===val); });
+  updateDiagnostico();
+}
+function setTextura(t) {
+  state.form.textura = state.form.textura===t ? null : t;
+  document.querySelectorAll('.textura-chip').forEach(c=>{ c.classList.toggle('selected', c.textContent===t); });
+  updateDiagnostico();
+}
+function setCurva(c) {
+  state.form.curva = state.form.curva===c ? null : c;
+  ['plana','parabola','invertida'].forEach(k=>{ document.getElementById('curva-'+k).classList.toggle('selected', k===c); });
+  updateDiagnostico();
+}
+
+// ══ DIAGNÓSTICO ══
+const DIAG = {
+  'Sedoso|plana':    {lvl:'warn', text:'Ejecución correcta, perfil sin desarrollar. El café tiene más para dar.', action:'→ Afinar molienda.'},
+  'Sedoso|parabola': {lvl:'ok',   text:'Shot ideal. Técnica y perfil alineados. Este es el objetivo.', action:'→ Registrar. Esta es la receta de referencia.'},
+  'Sedoso|invertida':{lvl:'warn', text:'Técnica bien ejecutada, balance desviado. Acidez sin dulzor que la sostenga.', action:'→ Abrir ratio.'},
+  'Aterciopelado|plana':    {lvl:'warn', text:'Cuerpo denso logrado, perfil sin abrir.', action:'→ Afinar molienda.'},
+  'Aterciopelado|parabola': {lvl:'ok',   text:'Shot de alto nivel. Poco frecuente en lavados.', action:'→ Anotar molienda exacta y registrar.'},
+  'Aterciopelado|invertida':{lvl:'warn', text:'Cuerpo logrado, balance desviado. Acidez sin dulzor.', action:'→ Abrir ratio para ganar dulzor.'},
+  'Cremoso|plana':    {lvl:'warn', text:'Punto de partida válido. Textura agradable pero el café no se expresa.', action:'→ Afinar molienda. No es el shot final.'},
+  'Cremoso|parabola': {lvl:'ok',   text:'Shot listo para servir. Textura agradable con perfil expresado.', action:'→ Registrar y replicar.'},
+  'Cremoso|invertida':{lvl:'warn', text:'Textura correcta, perfil torcido. Acidez sin contrapeso de dulzor.', action:'→ Abrir ratio.'},
+  'Áspero|plana':    {lvl:'bad',  text:'Subextracción con flujo caótico. Canal en el puck, molienda gruesa.', action:'→ Afinar molienda. Revisar distribución y tamping.'},
+  'Áspero|parabola': {lvl:'warn', text:'Balance logrado, ejecución imperfecta. El café se expresa pero hay canales.', action:'→ Revisar distribución. Si es el 3er intento: servir.'},
+  'Áspero|invertida':{lvl:'bad',  text:'Problema doble: técnica y perfil. Canal más balance desviado.', action:'→ Primero distribución, después ratio.'},
+  'Astringente|plana':    {lvl:'bad',  text:'Extracción excesiva con perfil apagado.', action:'→ Abrir molienda y ampliar ratio.'},
+  'Astringente|parabola': {lvl:'warn', text:'Perfil expresado, extracción levemente alta.', action:'→ Abrir ratio levemente.'},
+  'Astringente|invertida':{lvl:'bad',  text:'Sobreextracción clara. Taninos dominando el final.', action:'→ Abrir molienda y ampliar ratio.'},
+  'Seco|plana':    {lvl:'bad',  text:'Subextracción severa o café viejo. Sin aceites ni cuerpo.', action:'→ Verificar frescura. Afinar molienda.'},
+  'Seco|parabola': {lvl:'warn', text:'El perfil está, la emulsión no. Flujo irregular.', action:'→ Revisar distribución y precalentado del portafiltro.'},
+  'Seco|invertida':{lvl:'bad',  text:'Subextracción con flujo pobre. Acidez sin soporte.', action:'→ Afinar molienda. Revisar distribución.'},
+  'Acuoso|plana':    {lvl:'bad',  text:'Ratio muy largo o molienda gruesa. Café diluido sin expresión.', action:'→ Cerrar ratio. Afinar molienda.'},
+  'Acuoso|parabola': {lvl:'warn', text:'Perfil expresado, falta concentración. Ratio muy abierto para este café.', action:'→ Reducir rendimiento 3–5g y repetir.'},
+  'Acuoso|invertida':{lvl:'bad',  text:'Ratio largo más subextracción. Acidez sin dulzor ni cuerpo.', action:'→ Afinar molienda y cerrar ratio juntos.'},
+  'Corrosivo|plana':    {lvl:'bad',  text:'Canales severos o molino descalibrado. Flujo muy caótico.', action:'→ Revisar calibración del molino. Distribución y tamping.'},
+  'Corrosivo|parabola': {lvl:'warn', text:'Perfil presente pero ejecución con canales pronunciados.', action:'→ Revisar distribución antes del siguiente shot.'},
+  'Corrosivo|invertida':{lvl:'bad',  text:'Problema severo de ejecución y balance. Canales + extracción torcida.', action:'→ Revisar molino y distribución antes de continuar.'},
+  'Arenoso|plana':    {lvl:'bad',  text:'Partículas en lengua. Distribución irregular o molienda inconsistente.', action:'→ Revisar distribución en el portafiltro.'},
+  'Arenoso|parabola': {lvl:'warn', text:'Perfil interesante, distribución mejorable.', action:'→ Mejorar distribución en el portafiltro.'},
+  'Arenoso|invertida':{lvl:'bad',  text:'Distribución irregular más balance desviado.', action:'→ Distribución primero, después ratio.'},
+};
+
+function updateDiagnostico() {
+  const box = document.getElementById('diagnostico-box');
+  const t = state.form.textura; const c = state.form.curva;
+  if (!t || !c) { box.className='diagnostico-box'; document.getElementById('sugerencias-wrap').style.display='none'; return; }
+  const key = t+'|'+c;
+  const d = DIAG[key];
+  if (!d) { box.className='diagnostico-box'; document.getElementById('sugerencias-wrap').style.display='none'; return; }
+  box.className = 'diagnostico-box visible '+d.lvl;
+  const labels = {ok:'✓ Shot logrado', warn:'⚠ Revisar', bad:'✗ Problema detectado'};
+  document.getElementById('diag-label').className='diag-label '+d.lvl;
+  document.getElementById('diag-label').textContent=labels[d.lvl];
+  document.getElementById('diag-text').textContent=d.text;
+  document.getElementById('diag-action').textContent=d.action;
+  updateSugerencias();
+}
+
+// ══ MOTOR DE SUGERENCIAS ══
+// ── FUNCIONES DE RECETA Y PROYECCIÓN ──
+// Referencias Barista Hustle:
+// Espresso tradicional: TDS 8–12%, extracción 18–22%
+// Espresso moderno (BH "lungo"): TDS 6–9%, extracción 20–24%
+// Ventana óptima: 18–22% extracción para lavados de alta calidad
+// Tiempo estándar: 25–35s con 9 bar; ritmo ~1s por 0.1 de molienda (Mahlkonig E65S)
+
+function getDosis() {
+  return parseFloat(document.getElementById('inp-dosis').value) || 18;
+}
+
+function updateRatioDisplay() {
+  const d = getDosis();
+  const r = parseFloat(document.getElementById('inp-rendimiento').value);
+  const el = document.getElementById('ratio-display');
+  if (d && r) {
+    el.textContent = '1:' + (r/d).toFixed(2);
+  } else {
+    el.textContent = 'ratio —';
+  }
+}
+
+function getRecetaActual() {
+  const dosis = getDosis();
+  return {
+    molienda: parseFloat(document.getElementById('inp-molienda').value) || null,
+    rendimiento: parseFloat(document.getElementById('inp-rendimiento').value) || null,
+    tiempo: parseFloat(document.getElementById('inp-tiempo').value) || null,
+    tds: parseFloat(document.getElementById('inp-tds').value) || null,
+    extraccion: parseFloat(document.getElementById('inp-extraccion').value) || null,
+    dosis: dosis
+  };
+}
+
+// TDS proyectado: afinar → más resistencia → más tiempo → más solubles → TDS sube
+// Abrir ratio → más agua → TDS baja (pero extracción % puede subir)
+function proyectarTDS(tdsActual, deltaMol, deltaRend, dosis) {
+  if (!tdsActual) return null;
+  let delta = 0;
+  if (deltaMol) delta += deltaMol * 0.12;    // afinar 0.1 → TDS +0.012% aprox
+  if (deltaRend) delta += deltaRend * -0.07; // +5g rendimiento → TDS -0.035% aprox
+  const nuevo = tdsActual + delta;
+  return { min: Math.max(0, nuevo - 0.15).toFixed(2), max: (nuevo + 0.15).toFixed(2) };
+}
+
+// Extracción = (TDS × rendimiento) / dosis
+// Afinar → más solubles + tiempo → extracción sube
+// Abrir ratio → más agua → extracción también sube aunque TDS baja
+function proyectarExtraccion(extActual, deltaMol, deltaRend, dosis) {
+  if (!extActual) return null;
+  let delta = 0;
+  if (deltaMol) delta += deltaMol * 0.6;   // afinar 0.1 → ext +0.06% aprox
+  if (deltaRend) delta += deltaRend * 0.22; // +5g → ext +1.1% aprox
+  const nuevo = extActual + delta;
+  return { min: Math.max(0, nuevo - 0.4).toFixed(1), max: (nuevo + 0.4).toFixed(1) };
+}
+
+// CORREGIDO: afinar (deltaMol positivo) → más resistencia → más tiempo
+// Abrir (deltaMol negativo) → menos resistencia → menos tiempo
+// ~1.2s por cada 0.1 de molienda en E65S (BH reference)
+function proyectarTiempo(tiempoActual, deltaMol) {
+  if (!tiempoActual || !deltaMol) return null;
+  const delta = deltaMol * 12; // afinar 0.1 → +1.2s
+  return Math.round(tiempoActual + delta);
+}
+
+// Diagnóstico de zona de extracción (BH framework)
+function diagnosticoExtraccion(ext, tds) {
+  if (!ext) return null;
+  if (ext < 18) return { zona: 'sub', label: 'Sub-extraído (<18% · BH)', color: 'var(--danger)' };
+  if (ext <= 22 && tds >= 8 && tds <= 11) return { zona: 'ok', label: 'Ventana óptima (18–22% · BH)', color: 'var(--green)' };
+  if (ext <= 22) return { zona: 'ok-tds', label: 'Extracción correcta, revisar TDS', color: 'var(--warn)' };
+  if (ext <= 24) return { zona: 'alto', label: 'Extracción alta (22–24% · BH límite)', color: 'var(--warn)' };
+  return { zona: 'sobre', label: 'Sobre-extraído (>24% · BH)', color: 'var(--danger)' };
+}
+
+function renderSugCard(elId, num, sug) {
+  const tagClass = {molienda:'sug-tag-mol', ratio:'sug-tag-ratio', distribucion:'sug-tag-dist'}[sug.palanca] || 'sug-tag-mol';
+  const tagLabel = {molienda:'Molienda', ratio:'Ratio', distribucion:'Distribución'}[sug.palanca] || sug.palanca;
+
+  const proy = sug.proyeccion;
+  let proyHTML = '';
+  if (proy) {
+    proyHTML = `<div class="sug-proyeccion">
+      <div class="sug-proy-title">Proyección próximo shot</div>
+      <div class="sug-proy-grid">
+        ${proy.tiempo ? `<div class="sug-proy-item"><div class="sug-proy-val">${proy.tiempo}s</div><div class="sug-proy-label">Tiempo</div></div>` : ''}
+        ${proy.tds ? `<div class="sug-proy-item"><div class="sug-proy-val">${proy.tds.min}–${proy.tds.max}%</div><div class="sug-proy-label">TDS est.</div></div>` : ''}
+        ${proy.ext ? `<div class="sug-proy-item"><div class="sug-proy-val">${proy.ext.min}–${proy.ext.max}%</div><div class="sug-proy-label">Ext. est.</div></div>` : ''}
+      </div>
+    </div>`;
+  }
+
+  document.getElementById(elId).innerHTML = `
+    <div class="sug-header">
+      <span class="sug-num">Opción ${num}</span>
+      <span class="sug-tag ${tagClass}">${tagLabel}</span>
+    </div>
+    <div class="sug-body">
+      <div class="sug-accion">${sug.accion}</div>
+      <div class="sug-argumento">${sug.argumento}</div>
+      ${proyHTML}
+      <div class="sug-sensorial">🎯 ${sug.sensorial}</div>
+      <button class="sug-apply-btn" onclick="aplicarSugerencia(${JSON.stringify(sug.aplicar).replace(/"/g,'&quot;')})">Usar como decisión →</button>
+    </div>`;
+}
+
+function aplicarSugerencia(aplicar) {
+  if (aplicar.molienda) document.getElementById('inp-molienda').value = aplicar.molienda;
+  if (aplicar.rendimiento) document.getElementById('inp-rendimiento').value = aplicar.rendimiento;
+  document.getElementById('inp-decision').value = aplicar.decision;
+  document.getElementById('inp-decision').scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+function updateSugerencias() {
+  const t = state.form.textura;
+  const c = state.form.curva;
+  const r = getRecetaActual();
+  const wrap = document.getElementById('sugerencias-wrap');
+
+  const sugs = generarSugerencias(t, c, r);
+  if (!sugs || sugs.length < 2) { wrap.style.display='none'; return; }
+
+  wrap.style.display='flex';
+  renderSugCard('sug-1', 1, sugs[0]);
+  renderSugCard('sug-2', 2, sugs[1]);
+}
+
+function generarSugerencias(textura, curva, r) {
+  const mol = r.molienda;
+  const rend = r.rendimiento;
+  const tiempo = r.tiempo;
+  const tds = r.tds;
+  const ext = r.extraccion;
+  const dosis = r.dosis || 18;
+
+  // Contexto BH para el argumento de cada sugerencia
+  function zonaBH(e, t) {
+    if (!e) return '';
+    if (e < 18) return ` (estás en ${e.toFixed(1)}% — bajo la ventana BH de 18–22%)`;
+    if (e <= 22) return ` (estás en ${e.toFixed(1)}% — dentro de la ventana BH)`;
+    return ` (estás en ${e.toFixed(1)}% — por encima de la ventana BH de 22%)`;
+  }
+  const bhCtx = zonaBH(ext, tds);
+  const ratioActual = rend && dosis ? `1:${(rend/dosis).toFixed(2)}` : null;
+
+  // Helper: afinar molienda fuerte
+  function afinaFuerte(delta) {
+    const molNueva = mol ? Math.round((mol - delta) * 10) / 10 : null;
+    const tProyectado = proyectarTiempo(tiempo, delta);
+    const extProyectada = proyectarExtraccion(ext, delta, 0, dosis);
+    const enVentana = extProyectada ? parseFloat(extProyectada.max) <= 22.5 : true;
+    return {
+      palanca: 'molienda',
+      accion: mol ? `Afinar molienda de ${mol} → ${molNueva}` : `Afinar molienda ${delta*10} clics`,
+      argumento: `Molienda más fina aumenta resistencia al flujo. El tiempo va a subir de ${tiempo || '?'}s a ~${tProyectado || '?'}s, lo que da más tiempo de contacto para extraer dulzor y cuerpo${bhCtx}. Barista Hustle ubica la ventana de espresso de calidad entre 18–22% de extracción con TDS 8–11%.${enVentana ? ' Este ajuste te mantiene dentro de esa ventana.' : ' Monitorear extracción para no sobrepasarla.'}`,
+      proyeccion: {
+        tiempo: tProyectado,
+        tds: proyectarTDS(tds, delta, 0, dosis),
+        ext: extProyectada
+      },
+      sensorial: `Con más tiempo de extracción el dulzor llega primero, después el cuerpo. La acidez${ext && ext < 18 ? ' (ahora subextracción pura)' : ''} debería integrarse en lugar de sentirse cortante. Si la textura era áspera o seca, el flujo más lento y parejo la suaviza.`,
+      aplicar: { molienda: molNueva, decision: `Afiné molienda ${mol ? `de ${mol} a ${molNueva}` : `${delta*10} clics`}${tProyectado ? ` → apunto a ~${tProyectado}s` : ''}.` }
+    };
+  }
+
+  // Helper: afinar molienda suave (shot cerca del objetivo)
+  function afinaSuave(delta) {
+    const molNueva = mol ? Math.round((mol - delta) * 10) / 10 : null;
+    const tProyectado = proyectarTiempo(tiempo, delta);
+    return {
+      palanca: 'molienda',
+      accion: mol ? `Micro-ajuste: molienda de ${mol} → ${molNueva}` : `Afinar ${delta*10} clics`,
+      argumento: `El shot ya tiene buen balance — este es un ajuste de precisión, no de rescate. ${delta*10} clics en E65S equivalen a ~${(delta*12).toFixed(0)}s adicionales${tProyectado && tiempo ? ` (de ${tiempo}s a ~${tProyectado}s)` : ''}. BH recomienda micro-ajustes de 1–2 clics cuando el shot está cerca pero la textura no termina de cerrar. No mover el ratio.`,
+      proyeccion: {
+        tiempo: tProyectado,
+        tds: proyectarTDS(tds, delta, 0, dosis),
+        ext: proyectarExtraccion(ext, delta, 0, dosis)
+      },
+      sensorial: `El dulzor debería ganar claridad y la textura volverse más continua y redondeada. Cambio sutil — si no lo sentís en el próximo shot, no seguir afinando sin revisar otros factores.`,
+      aplicar: { molienda: molNueva, decision: `Micro-ajuste molienda ${mol ? `de ${mol} a ${molNueva}` : `${delta*10} clics`}.` }
+    };
+  }
+
+  // Helper: abrir ratio (más agua)
+  function abrirRatio(deltaRend) {
+    const rendNuevo = rend ? Math.round(rend + deltaRend) : null;
+    const ratioNuevo = rendNuevo ? `1:${(rendNuevo/dosis).toFixed(2)}` : null;
+    const extProyectada = proyectarExtraccion(ext, 0, deltaRend, dosis);
+    return {
+      palanca: 'ratio',
+      accion: rend ? `Abrir ratio: ${rend}g → ${rendNuevo}g${ratioActual ? ` (${ratioActual} → ${ratioNuevo})` : ''}` : `Aumentar rendimiento ${deltaRend}g`,
+      argumento: `Abrir el ratio diluye la concentración${tds ? ` (TDS va a bajar de ${tds}% a ~${(tds - deltaRend*0.07).toFixed(2)}%)` : ''} pero sube la extracción porcentual${extProyectada ? ` a ~${extProyectada.min}–${extProyectada.max}%` : ''}. BH usa ratios 1:2.2–1:2.5 en lavados de alta calidad para que el dulzor no quede aplastado por la concentración. Con acidez dominante, el agua extra actúa como buffer: suaviza la tensión y le da espacio al dulzor del final.`,
+      proyeccion: {
+        tiempo: tiempo ? Math.round(tiempo + deltaRend * 0.3) : null,
+        tds: proyectarTDS(tds, 0, deltaRend, dosis),
+        ext: extProyectada
+      },
+      sensorial: `La acidez va a perder intensidad percibida. El dulzor va a aparecer más claro en el medio de la taza y el posgusto debería alargarse. El shot va a sentirse más redondo y menos tenso en el inicio.`,
+      aplicar: { rendimiento: rendNuevo, decision: `Abrí ratio a ${rendNuevo || '?'}g${ratioNuevo ? ` (${ratioNuevo})` : ''} para integrar acidez y ganar dulzor.` }
+    };
+  }
+
+  // Helper: cerrar ratio (menos agua)
+  function cerrarRatio(deltaRend) {
+    const rendNuevo = rend ? Math.round(rend - deltaRend) : null;
+    const ratioNuevo = rendNuevo ? `1:${(rendNuevo/dosis).toFixed(2)}` : null;
+    const tdsProyectado = proyectarTDS(tds, 0, -deltaRend, dosis);
+    return {
+      palanca: 'ratio',
+      accion: rend ? `Cerrar ratio: ${rend}g → ${rendNuevo}g${ratioActual ? ` (${ratioActual} → ${ratioNuevo})` : ''}` : `Reducir rendimiento ${deltaRend}g`,
+      argumento: `Menos agua concentra los solubles${tdsProyectado ? ` — TDS va a subir de ${tds}% a ~${tdsProyectado.min}–${tdsProyectado.max}%` : ''}. BH sitúa el espresso tradicional en TDS 8–11%: si estás por debajo de ese piso con textura acuosa, cerrar el ratio es la palanca más directa. No tocar la molienda todavía.`,
+      proyeccion: {
+        tiempo: tiempo ? Math.round(tiempo - deltaRend * 0.3) : null,
+        tds: tdsProyectado,
+        ext: proyectarExtraccion(ext, 0, -deltaRend, dosis)
+      },
+      sensorial: `El shot va a sentirse más denso y con más cuerpo. El dulzor se va a concentrar. Cuidado: si cerrás demasiado (ratio < 1:1.5) puede aparecer amargor o astringencia por concentración excesiva.`,
+      aplicar: { rendimiento: rendNuevo, decision: `Cerré ratio a ${rendNuevo || '?'}g${ratioNuevo ? ` (${ratioNuevo})` : ''} para ganar concentración y cuerpo.` }
+    };
+  }
+
+  // Helper: distribución y tamping
+  function distribucion() {
+    return {
+      palanca: 'distribucion',
+      accion: 'Revisar distribución del puck y tamping antes del próximo shot',
+      argumento: `Textura irregular (áspera, arenosa, corrosiva) con balance sensorial presente indica canales en el puck — el agua encuentra el camino de menor resistencia y sobre-extrae esa zona mientras el resto queda sub-extraído. BH identifica esto como la causa más frecuente de TDS errático con extracción aparentemente correcta. Ratio y molienda están bien; el problema es la física del puck.`,
+      proyeccion: null,
+      sensorial: `Si la distribución mejora, la textura debería pasar de áspera/irregular a sedosa o cremosa sin cambiar el balance. El TDS va a subir levemente porque el agua va a mojar el café de forma más pareja — eso es buena señal.`,
+      aplicar: { decision: `Redistribuí el puck (WDT o declive) + tamping nivelado — mismo ratio y molienda.` }
+    };
+  }
+
+  // Helper: abrir molienda (menos tiempo)
+  function abrirMolienda(delta) {
+    const molNueva = mol ? Math.round((mol + delta) * 10) / 10 : null;
+    const tProyectado = proyectarTiempo(tiempo, -delta);
+    const extProyectada = proyectarExtraccion(ext, -delta, 0, dosis);
+    return {
+      palanca: 'molienda',
+      accion: mol ? `Abrir molienda de ${mol} → ${molNueva}` : `Abrir molienda ${delta*10} clics`,
+      argumento: `Molienda más gruesa reduce resistencia y acorta el tiempo${tiempo && tProyectado ? ` de ${tiempo}s a ~${tProyectado}s` : ''}. Menos tiempo extrae menos taninos y ácidos fenólicos — los responsables de la astringencia${extProyectada ? `. La extracción va a bajar a ~${extProyectada.min}–${extProyectada.max}%` : ''}. BH recomienda no sacrificar más de 1–2% de extracción para eliminar astringencia; si el shot baja de 18% empieza a perder dulzor.`,
+      proyeccion: {
+        tiempo: tProyectado,
+        tds: proyectarTDS(tds, -delta, 0, dosis),
+        ext: extProyectada
+      },
+      sensorial: `La astringencia (ese "seco" que agarra en el fondo de la lengua) debería reducirse. El shot va a sentirse más limpio. Puede perder algo de cuerpo — si el balance estaba bien, abrí solo lo necesario.`,
+      aplicar: { molienda: molNueva, decision: `Abrí molienda ${mol ? `de ${mol} a ${molNueva}` : `${delta*10} clics`}${tProyectado ? ` → apunto a ~${tProyectado}s` : ''} para reducir astringencia.` }
+    };
+  }
+
+  // ── LÓGICA POR CASO ──
+  const key = textura + '|' + curva;
+
+  const MAP = {
+    'Sedoso|plana':          [afinaFuerte(0.2), afinaFuerte(0.3)],
+    'Sedoso|parabola':       [afinaSuave(0.1), abrirRatio(3)],
+    'Sedoso|invertida':      [abrirRatio(5), abrirRatio(7)],
+    'Aterciopelado|plana':   [afinaFuerte(0.2), afinaFuerte(0.4)],
+    'Aterciopelado|parabola':[afinaSuave(0.1), cerrarRatio(3)],
+    'Aterciopelado|invertida':[abrirRatio(4), abrirRatio(7)],
+    'Cremoso|plana':         [afinaFuerte(0.2), afinaFuerte(0.3)],
+    'Cremoso|parabola':      [afinaSuave(0.1), abrirRatio(3)],
+    'Cremoso|invertida':     [abrirRatio(5), afinaFuerte(0.2)],
+    'Áspero|plana':          [afinaFuerte(0.3), distribucion()],
+    'Áspero|parabola':       [distribucion(), afinaSuave(0.1)],
+    'Áspero|invertida':      [distribucion(), abrirRatio(5)],
+    'Astringente|plana':     [abrirMolienda(0.3), abrirRatio(5)],
+    'Astringente|parabola':  [abrirRatio(4), abrirMolienda(0.2)],
+    'Astringente|invertida': [abrirMolienda(0.3), abrirRatio(7)],
+    'Seco|plana':            [afinaFuerte(0.3), afinaFuerte(0.4)],
+    'Seco|parabola':         [distribucion(), afinaSuave(0.1)],
+    'Seco|invertida':        [afinaFuerte(0.3), distribucion()],
+    'Acuoso|plana':          [cerrarRatio(5), afinaFuerte(0.2)],
+    'Acuoso|parabola':       [cerrarRatio(4), cerrarRatio(6)],
+    'Acuoso|invertida':      [afinaFuerte(0.2), cerrarRatio(4)],
+    'Corrosivo|plana':       [distribucion(), afinaFuerte(0.3)],
+    'Corrosivo|parabola':    [distribucion(), afinaSuave(0.1)],
+    'Corrosivo|invertida':   [distribucion(), abrirRatio(4)],
+    'Arenoso|plana':         [distribucion(), afinaFuerte(0.2)],
+    'Arenoso|parabola':      [distribucion(), afinaSuave(0.1)],
+    'Arenoso|invertida':     [distribucion(), abrirRatio(4)],
+  };
+
+  return MAP[key] || null;
+}
+
+// ══ GUARDAR SHOT ══
+function updateShotCounter() {
+  const hoy = state.shots.filter(s=>s.fecha===TODAY);
+  document.getElementById('shot-counter').textContent = hoy.length+' registrado(s)';
+}
+function guardarShot() {
+  if (!state.cafeActivo) { alert('Seleccioná un café primero.'); return; }
+  const shot = {
+    id: 's'+Date.now(),
+    barista: state.barista,
+    baristaKey: state.baristaKey,
+    cafeId: state.cafeActivo,
+    fecha: TODAY,
+    hora: new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'}),
+    sensorial: {...state.form},
+    receta: {
+      dosis: getDosis(),
+      molienda: document.getElementById('inp-molienda').value||'—',
+      rendimiento: document.getElementById('inp-rendimiento').value||'—',
+      tiempo: document.getElementById('inp-tiempo').value||'—',
+      tds: document.getElementById('inp-tds').value||'—',
+      extraccion: document.getElementById('inp-extraccion').value||'—',
+    },
+    decision: document.getElementById('inp-decision').value||'Sin decisión registrada',
+    comentario: document.getElementById('inp-comentario').value||'',
+    diagnostico: (state.form.textura&&state.form.curva) ? DIAG[state.form.textura+'|'+state.form.curva] : null,
+    cafe: state.cafes.find(c=>c.id===state.cafeActivo),
+    favorito: state.form.favorito || false,
+    clima: state.turnoClima ? {...state.turnoClima} : null
+  };
+  state.shots.push(shot); save(); updateShotCounter();
+  resetForm();
+  const btn = document.querySelector('.btn-primary');
+  btn.textContent='✓ Registrado'; btn.style.background='var(--green)';
+  setTimeout(()=>{ btn.textContent='Registrar shot'; btn.style.background=''; },1800);
+}
+function resetForm() {
+  state.form = {acidez:0,dulzor:0,posgusto:0,cuerpo:0,textura:null,curva:null};
+  document.querySelectorAll('.scale-btn').forEach(b=>b.classList.remove('selected'));
+  document.querySelectorAll('.textura-chip').forEach(c=>c.classList.remove('selected'));
+  document.querySelectorAll('.curva-btn').forEach(b=>b.classList.remove('selected'));
+  ['inp-molienda','inp-rendimiento','inp-tiempo','inp-tds','inp-extraccion','inp-decision','inp-comentario','inp-temp','inp-presion','inp-reposo'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  updateRatioDisplay();
+  document.getElementById('diagnostico-box').className='diagnostico-box';
+  document.getElementById('sugerencias-wrap').style.display='none';
+  state.form.favorito = false;
+  const si = document.getElementById('star-icon');
+  const sl = document.getElementById('star-label');
+  const sb = document.getElementById('star-btn');
+  if(si){si.textContent='☆';si.style.opacity='0.3';}
+  if(sl){sl.textContent='Marcar como receta favorita';}
+  if(sb){sb.style.background='';sb.style.borderColor='';}
+}
+
+// ══ HISTORIAL ══
+let histFilter = 'all';
+function filterHist(f, btn) {
+  histFilter = f;
+  document.querySelectorAll('.hist-filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderHist();
+}
+function renderHist() {
+  const list = document.getElementById('hist-list');
+  let shots = [...state.shots].reverse();
+  if (histFilter === 'favoritos') shots = shots.filter(s=>s.favorito);
+  else if (histFilter === 'all') { /* all */ }
+  else if (['☀️','⛅','🌧️','🌫️','❄️','🔥'].includes(histFilter)) shots = shots.filter(s=>s.clima&&s.clima.emoji&&s.clima.emoji.trim()===histFilter.trim());
+  else shots = shots.filter(s=>s.barista===histFilter);
+  if (!shots.length) { list.innerHTML='<div class="empty-state"><div class="empty-icon">☕</div><div class="empty-text">Sin shots registrados aún.<br>Calibrá el primer espresso del día.</div></div>'; return; }
+
+  // Agrupar por fecha y café
+  const groups = {};
+  shots.forEach(s=>{
+    const cafe = state.cafes.find(c=>c.id===s.cafeId);
+    const key = s.fecha + '|' + (cafe?cafe.nombre:'Café desconocido');
+    if (!groups[key]) groups[key] = {fecha:s.fecha, cafe:cafe?cafe.nombre:'—', shots:[]};
+    groups[key].shots.push(s);
+  });
+
+  list.innerHTML = Object.values(groups).map(g=>`
+    <div class="hist-group-label">${g.fecha} · ${g.cafe}</div>
+    ${g.shots.map(s=>shotCard(s)).join('')}
+  `).join('');
+}
+function shotCard(s) {
+  const lvlPill = s.diagnostico ? `<span class="hist-pill ${s.diagnostico.lvl}">${{ok:'✓ Logrado',warn:'⚠ Revisar',bad:'✗ Problema'}[s.diagnostico.lvl]}</span>` : '';
+  return `<div class="hist-shot" onclick="openShotModal('${s.id}')">
+    <div class="hist-shot-header">
+      <span class="hist-barista ${s.baristaKey}">${s.barista} · ${s.hora}</span>
+      <div style="display:flex;align-items:center;gap:6px">
+        ${s.favorito ? '<span style="font-size:0.9rem">⭐</span>' : ''}
+        ${s.clima&&s.clima.emoji ? '<span style="font-size:0.85rem" title="'+s.clima.label+(s.clima.temp?'  '+s.clima.temp+'°C':'')+'">'+s.clima.emoji+'</span>' : ''}
+        <span class="hist-time">${s.receta.molienda!='—'?'mol '+s.receta.molienda:''}${s.receta.rendimiento!='—'?' / '+s.receta.rendimiento+'g':''}</span>
+      </div>
+    </div>
+    <div class="hist-sensorial">
+      ${s.sensorial.acidez?`<span class="hist-pill warn">Ac ${s.sensorial.acidez}</span>`:''}
+      ${s.sensorial.dulzor?`<span class="hist-pill ok">Dulz ${s.sensorial.dulzor}</span>`:''}
+      ${s.sensorial.posgusto?`<span class="hist-pill ok">Post ${s.sensorial.posgusto}</span>`:''}
+      ${s.sensorial.cuerpo?`<span class="hist-pill warn">Cpo ${s.sensorial.cuerpo}</span>`:''}
+      ${lvlPill}
+    </div>
+    ${s.sensorial.textura?`<div class="hist-textura">${s.sensorial.textura}${s.sensorial.curva?' · curva '+s.sensorial.curva:''}</div>`:''}
+    <div class="hist-decision">↳ ${s.decision}</div>
+    ${s.comentario ? `<div style="font-size:0.72rem;color:var(--ink3);line-height:1.4;margin-top:4px;font-style:italic">"${s.comentario}"</div>` : ''}
+  </div>`;
+}
+function openShotModal(id) {
+  const s = state.shots.find(x=>x.id===id);
+  if (!s) return;
+  const cafe = state.cafes.find(c=>c.id===s.cafeId);
+  const d = s.diagnostico;
+  document.getElementById('modal-shot-content').innerHTML = `
+    <div class="modal-handle"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+      <div class="modal-title" style="margin:0">${s.barista} · ${s.hora}</div>
+      <span class="hist-barista ${s.baristaKey}" style="display:inline-block">${s.fecha}</span>
+    </div>
+    ${cafe?`<div style="font-size:0.8rem;color:var(--ink3);margin-bottom:1rem;font-family:'DM Mono',monospace">${cafe.nombre}</div>`:''}
+    <div class="hist-receta" style="flex-wrap:wrap;gap:16px;margin-bottom:1rem">
+      <div class="hist-val"><div class="hist-val-label">Dosis</div><div class="hist-val-num">18g</div></div>
+      <div class="hist-val"><div class="hist-val-label">Molienda</div><div class="hist-val-num">${s.receta.molienda}</div></div>
+      <div class="hist-val"><div class="hist-val-label">Rendimiento</div><div class="hist-val-num">${s.receta.rendimiento}g</div></div>
+      <div class="hist-val"><div class="hist-val-label">Tiempo</div><div class="hist-val-num">${s.receta.tiempo}s</div></div>
+      <div class="hist-val"><div class="hist-val-label">TDS</div><div class="hist-val-num">${s.receta.tds}%</div></div>
+      <div class="hist-val"><div class="hist-val-label">Extracción</div><div class="hist-val-num">${s.receta.extraccion}%</div></div>
+    </div>
+    <div class="divider" style="margin-bottom:1rem"></div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1rem;text-align:center">
+      ${['acidez','dulzor','posgusto','cuerpo'].map(k=>`<div><div style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--ink3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">${k}</div><div style="font-size:1.4rem;font-family:'DM Serif Display',serif">${s.sensorial[k]||'—'}</div></div>`).join('')}
+    </div>
+    ${s.sensorial.textura?`<div style="font-size:0.85rem;color:var(--ink2);margin-bottom:0.5rem">Textura: <strong>${s.sensorial.textura}</strong>${s.sensorial.curva?' · Curva '+s.sensorial.curva:''}</div>`:''}
+    ${d?`<div class="diagnostico-box visible ${d.lvl}" style="margin-bottom:1rem"><div class="diag-label ${d.lvl}">${{ok:'✓ Shot logrado',warn:'⚠ Revisar',bad:'✗ Problema'}[d.lvl]}</div><div class="diag-text">${d.text}</div><div class="diag-action">${d.action}</div></div>`:''}
+    <div style="background:var(--bg2);border-radius:var(--r-sm);padding:0.75rem 1rem">
+      <div style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px">Decisión tomada</div>
+      <div style="font-size:0.85rem;color:var(--ink2);line-height:1.5">${s.decision}</div>
+    </div>
+    ${s.comentario ? `<div style="background:var(--bg2);border-radius:var(--r-sm);padding:0.75rem 1rem;margin-top:8px;border-left:3px solid var(--border)">
+      <div style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px">Comentario</div>
+      <div style="font-size:0.85rem;color:var(--ink2);line-height:1.5;font-style:italic">${s.comentario}</div>
+    </div>` : ''}
+    <button class="btn-secondary" style="margin-top:1rem" onclick="closeShotModal()">Cerrar</button>
+  `;
+  document.getElementById('modal-shot').classList.add('open');
+}
+function closeShotModal(e) { if (!e||e.target===document.getElementById('modal-shot')) document.getElementById('modal-shot').classList.remove('open'); }
+
+// ══ COMPARATIVA ══
+function renderComparativa() {
+  const today = state.shots.filter(s=>s.fecha===TODAY);
+  ['sofi','cami'].forEach(key=>{
+    const name = key==='sofi'?'Sofi':'Cami';
+    const shots = today.filter(s=>s.baristaKey===key);
+    const statsEl = document.getElementById('stats-'+key);
+    statsEl.innerHTML = `<div class="compare-metric-val">${shots.length}</div><div class="compare-metric-label">shots hoy</div>`;
+    const curvaEl = document.getElementById('curva-'+key);
+    if (shots.length) {
+      const avg = (dim) => (shots.reduce((a,s)=>a+(s.sensorial[dim]||0),0)/shots.length);
+      const a=avg('acidez'), d=avg('dulzor'), p=avg('posgusto');
+      const max=3; const h=(v)=>Math.max(4,Math.round((v/max)*36));
+      curvaEl.innerHTML = `
+        <div style="display:flex;flex-direction:column;align-items:center"><div class="mini-bar acid" style="height:${h(a)}px"></div><div class="mini-bar-label">${a.toFixed(1)}</div></div>
+        <div style="display:flex;flex-direction:column;align-items:center"><div class="mini-bar sweet" style="height:${h(d)}px"></div><div class="mini-bar-label">${d.toFixed(1)}</div></div>
+        <div style="display:flex;flex-direction:column;align-items:center"><div class="mini-bar post" style="height:${h(p)}px"></div><div class="mini-bar-label">${p.toFixed(1)}</div></div>`;
+    } else {
+      curvaEl.innerHTML='<div style="font-size:0.7rem;color:var(--ink3);width:100%;text-align:center">sin datos</div>';
+    }
+  });
+
+  // Texturas
+  const texCount = {};
+  today.forEach(s=>{ if(s.sensorial.textura){ texCount[s.sensorial.textura]=(texCount[s.sensorial.textura]||0)+1; } });
+  const texEl = document.getElementById('texturas-compare');
+  if (!Object.keys(texCount).length) { texEl.innerHTML='<div class="empty-state"><div class="empty-text">Sin datos aún</div></div>'; }
+  else {
+    const sorted = Object.entries(texCount).sort((a,b)=>b[1]-a[1]);
+    texEl.innerHTML = sorted.map(([t,n])=>`
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border2)">
+        <span style="font-size:0.85rem;color:var(--ink2)">${t}</span>
+        <span style="font-family:'DM Mono',monospace;font-size:0.8rem;color:var(--ink3)">${n}x</span>
+      </div>`).join('');
+  }
+
+  // Decisiones
+  const decEl = document.getElementById('decisiones-compare');
+  if (!today.length) { decEl.innerHTML='<div class="empty-state"><div class="empty-text">Sin datos aún</div></div>'; }
+  else {
+    decEl.innerHTML = today.filter(s=>s.decision&&s.decision!=='Sin decisión registrada').map(s=>`
+      <div style="padding:8px 0;border-bottom:1px solid var(--border2)">
+        <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+          <span class="hist-barista ${s.baristaKey}" style="display:inline-block">${s.barista}</span>
+          <span class="text-mono-sm">${s.hora}</span>
+        </div>
+        <div style="font-size:0.8rem;color:var(--ink2);line-height:1.4">${s.decision}</div>
+      </div>`).join('');
+  }
+}
+
+// ══ CLIMA + BARISTA PRE-STEP ══
+let _tempBarista = null;
+let _tempBaristaKey = null;
+let _tempShift = null;
+let _selectedClima = null;
+
+function selectBaristaPre(name, key, shift) {
+  _tempBarista = name; _tempBaristaKey = key; _tempShift = shift;
+  document.getElementById('step-barista').style.display = 'none';
+  const sc = document.getElementById('step-clima');
+  sc.style.display = 'flex';
+  sc.style.flexDirection = 'column';
+  sc.style.alignItems = 'center';
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'Buenos días' : hour < 19 ? 'Buenas tardes' : 'Buenas noches';
+  document.getElementById('clima-greeting').textContent = greeting + ', ' + name;
+}
+function promptCustomBaristaPre() {
+  const n = prompt('Nombre:');
+  if (n) selectBaristaPre(n, 'custom', 'Turno');
+}
+function setClima(btn) {
+  document.querySelectorAll('#clima-iconos .clima-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  _selectedClima = { emoji: btn.dataset.clima, label: btn.dataset.label };
+}
+function confirmarClima() {
+  const temp = document.getElementById('clima-temp').value;
+  const hum = document.getElementById('clima-hum').value;
+  state.turnoClima = {
+    emoji: _selectedClima ? _selectedClima.emoji : null,
+    label: _selectedClima ? _selectedClima.label : null,
+    temp: temp || null,
+    hum: hum || null
+  };
+  if (state.turnoClima.emoji) {
+    document.getElementById('clima-header-btn').textContent = state.turnoClima.emoji;
+  }
+  selectBarista(_tempBarista, _tempBaristaKey, _tempShift);
+}
+
+
+// ══ EXTRA FIELDS (temp/presion/reposo) ══
+function toggleExtraFields() {
+  const el = document.getElementById('extra-fields');
+  const arrow = document.getElementById('extra-fields-arrow');
+  const visible = el.style.display !== 'none';
+  el.style.display = visible ? 'none' : 'flex';
+  arrow.textContent = visible ? '▸' : '▾';
+}
+
+function updateReposoIndicador() {
+  const dias = parseInt(document.getElementById('inp-reposo').value);
+  const el = document.getElementById('reposo-indicador');
+  if (!dias) { el.style.display='none'; return; }
+  const info = getReposoInfo(dias);
+  el.style.display = 'block';
+  el.style.background = info.bg;
+  el.style.borderLeft = '3px solid ' + info.color;
+  el.style.color = 'var(--ink2)';
+  el.innerHTML = `<span style="font-family:'DM Mono',monospace;font-size:0.58rem;letter-spacing:0.1em;text-transform:uppercase;color:${info.color}">${info.zona}</span><br>${info.desc}`;
+}
+
+function getReposoInfo(dias) {
+  if (dias < 7) return {
+    zona: 'Muy fresco — gases en salida',
+    bg: 'var(--danger-bg)', color: 'var(--danger)',
+    desc: 'El CO₂ residual del tueste interfiere con la extracción: el gas crea canales y empuja el agua, generando shots irregulares y cremema excesiva con sabor agrio. Esperar al menos 7–10 días para lavados.'
+  };
+  if (dias <= 14) return {
+    zona: 'Ventana de desgasificación · óptimo para espresso',
+    bg: 'var(--green-bg)', color: 'var(--green)',
+    desc: 'Zona ideal para espresso: el CO₂ bajó lo suficiente para una extracción pareja y los compuestos aromáticos están en su pico. Aprovecharlo — en 2–3 semanas empieza el declive oxidativo.'
+  };
+  if (dias <= 21) return {
+    zona: 'Buena ventana — aromáticos en desarrollo',
+    bg: 'var(--green-bg)', color: 'var(--green)',
+    desc: 'Todavía en buena zona. Los ácidos volátiles siguen activos pero el dulzor puede necesitar un ratio levemente más cerrado que en la primera semana para mantener concentración.'
+  };
+  if (dias <= 35) return {
+    zona: 'Inicio del declive — ajustar receta',
+    bg: 'var(--warn-bg)', color: 'var(--warn)',
+    desc: 'Los compuestos aromáticos empiezan a oxidarse. El café va a pedir molienda más fina y/o temperatura más alta para compensar la pérdida de reactividad. TDS y extracción bajan con la misma receta.'
+  };
+  if (dias <= 60) return {
+    zona: 'Declive marcado — compensar activamente',
+    bg: 'var(--warn-bg)', color: 'var(--warn)',
+    desc: 'La oxidación es significativa. Afinar molienda 2–3 puntos respecto a la receta original, considerar subir temperatura 1–2°C. El dulzor va a ser difícil de mantener sin cambios activos.'
+  };
+  return {
+    zona: 'Café muy viejo — considerar para blend o leche',
+    bg: 'var(--danger-bg)', color: 'var(--danger)',
+    desc: 'Después de 60 días los volátiles responsables del dulzor y la claridad están mayormente oxidados. En espresso solo va a costar mucho encontrar definición. Funciona mejor con leche donde la textura cubre la pérdida de complejidad.'
+  };
+}
+
+// ══ CATA REFERENCIA EN CALIBRAR ══
+function updateCataReferencia() {
+  const cafeId = state.cafeActivo;
+  if (!cafeId) return;
+  const key = getCataKey(cafeId);
+  const cata = (state.catas || {})[key];
+  const banner = document.getElementById('cata-referencia-banner');
+  if (!cata) { banner.style.display='none'; return; }
+
+  banner.style.display = 'block';
+
+  // Mini bar chart
+  const a = cata.acidez||0, d = cata.dulzor||0, p = cata.posgusto||0;
+  const barH = (v) => v ? Math.round((v/3)*32) : 4;
+  const dims = [{val:a,color:'var(--accent2)',label:'Ac'},{val:d,color:'var(--gold)',label:'Dulz'},{val:p,color:'var(--green)',label:'Post'}];
+  document.getElementById('cata-ref-curva-mini').innerHTML = dims.map(({val,color,label})=>`
+    <div style="display:flex;flex-direction:column;align-items:center;gap:2px">
+      <div style="width:20px;height:${barH(val)}px;background:${color};border-radius:3px 3px 0 0;transition:height 0.3s"></div>
+      <span style="font-family:'DM Mono',monospace;font-size:0.52rem;color:var(--ink3)">${label} ${val}</span>
+    </div>`).join('');
+
+  // Guia condensada
+  let guia = '';
+  if (d >= a && d >= p) guia = `Parábola con dulzor en pico (${d}/3). Buscar replicar ese balance en espresso — ratio 1:2.2–1:2.4, tiempo 27–31s.`;
+  else if (a > d) guia = `Acidez dominante en cata (Ac ${a} vs Dulz ${d}). En espresso abrir ratio para que el dulzor gane espacio.`;
+  else if (p > d) guia = `Posgusto fuerte (${p}/3). Cuidar que no se vuelva amargo — ratio moderado 1:2–1:2.2.`;
+  else guia = `Perfil plano en cata. Afinar molienda para abrir el dulzor y crear más contraste.`;
+
+  document.getElementById('cata-ref-guia').textContent = guia;
+}
+
+// ══ ANÁLISIS ══
+function renderAnalisis() {
+  const cafeId = state.cafeActivo;
+  const cafe = state.cafes.find(c=>c.id===cafeId);
+  const dias = cafe ? calcDays(cafe.tueste) : 0;
+  const shots = state.shots.filter(s=>s.cafeId===cafeId);
+  const cata = (state.catas||{})[getCataKey(cafeId)];
+
+  // Cafe header
+  if (cafe) {
+    document.getElementById('analisis-cafe-nombre').textContent = cafe.nombre;
+    document.getElementById('analisis-cafe-meta').textContent = cafe.proceso + ' · Tueste ' + cafe.tueste;
+    const repBadge = document.getElementById('analisis-reposo-badge');
+    const info = getReposoInfo(dias);
+    repBadge.textContent = dias + 'd';
+    repBadge.style.background = info.bg === 'var(--green-bg)' ? 'rgba(58,107,62,0.15)' : info.bg === 'var(--warn-bg)' ? 'rgba(139,105,20,0.15)' : 'rgba(139,32,32,0.15)';
+    repBadge.style.color = info.color;
+  }
+
+  // Guía de días de tueste
+  renderTuesteGuia(dias, cata);
+
+  // Protocolo
+  renderProtocolo(dias, shots, cata);
+
+  // Patrones
+  renderPatrones(shots);
+
+  // Mejores shots
+  renderMejores(shots);
+}
+
+function renderTuesteGuia(dias, cata) {
+  const el = document.getElementById('analisis-tueste-guia');
+  const info = getReposoInfo(dias);
+  const cataA = cata ? cata.acidez : null;
+  const cataD = cata ? cata.dulzor : null;
+  const cataP = cata ? cata.posgusto : null;
+
+  // Receta base según días
+  let recetaBase = '';
+  if (dias <= 14) recetaBase = 'Ratio 1:2.2–1:2.4 · Tiempo 27–31s · Temp 92–93°C';
+  else if (dias <= 21) recetaBase = 'Ratio 1:2.2–1:2.4 · Tiempo 28–32s · Temp 92–94°C';
+  else if (dias <= 35) recetaBase = 'Afinar molienda +0.2–0.3 respecto semana 1 · Temp 93–94°C';
+  else if (dias <= 60) recetaBase = 'Afinar molienda +0.3–0.5 · Temp 94–95°C · Ratio más cerrado 1:2–1:2.2';
+  else recetaBase = 'Compensación máxima: molienda muy fina + temp alta + ratio cerrado. Mejor con leche.';
+
+  // Ajuste por cata
+  let ajusteCata = '';
+  if (cataD && cataA && cataD < cataA) ajusteCata = ' · La cata muestra acidez sobre dulzor — abrir ratio para compensar.';
+  else if (cataD && cataD >= 2) ajusteCata = ' · Dulzor fuerte en cata — ratio moderado para no diluir.';
+
+  el.innerHTML = `<div class="card-body">
+    <div class="tueste-zona" style="background:${info.bg};border-left-color:${info.color}">
+      <div class="tueste-zona-titulo" style="color:${info.color}">${dias}d de tueste · ${info.zona}</div>
+      <div class="tueste-zona-desc">${info.desc}</div>
+    </div>
+    <div style="background:var(--bg2);border-radius:var(--r-sm);padding:0.65rem 0.85rem">
+      <div style="font-family:'DM Mono',monospace;font-size:0.58rem;color:var(--ink3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px">Receta base recomendada para este momento</div>
+      <div style="font-size:0.82rem;color:var(--ink);line-height:1.5">${recetaBase}${ajusteCata}</div>
+    </div>
+  </div>`;
+}
+
+function renderProtocolo(dias, shots, cata) {
+  // Analyze existing shots for patterns
+  const shotsRecientes = shots.slice(-10);
+  const avgExt = shotsRecientes.length ? shotsRecientes.reduce((a,s)=>a+(parseFloat(s.receta.extraccion)||0),0)/shotsRecientes.filter(s=>s.receta.extraccion!='—').length : null;
+  const avgTiempo = shotsRecientes.length ? shotsRecientes.reduce((a,s)=>a+(parseFloat(s.receta.tiempo)||0),0)/shotsRecientes.filter(s=>s.receta.tiempo!='—').length : null;
+  const texturasNeg = shotsRecientes.filter(s=>['Áspero','Astringente','Seco','Acuoso','Corrosivo','Arenoso'].includes(s.sensorial?.textura));
+  const texturasDom = texturasNeg.length > shotsRecientes.length * 0.4;
+
+  // Intro based on current situation
+  let intro = '';
+  if (!shots.length) {
+    intro = 'Sin shots registrados aún para este café. El protocolo de abajo es el punto de partida recomendado.';
+  } else if (avgExt && avgExt < 18) {
+    intro = `Promedio de extracción en los últimos ${shotsRecientes.length} shots: ${avgExt.toFixed(1)}% — bajo la ventana BH de 18–22%. El café está sub-extraído sistemáticamente. Los pasos de abajo están ordenados para resolver esto.`;
+  } else if (avgTiempo && avgTiempo < 25) {
+    intro = `Tiempo promedio de ${avgTiempo.toFixed(0)}s — por debajo de los 25s mínimos para lavados de calidad. Los shots están saliendo demasiado rápido, lo que compromete el dulzor.`;
+  } else {
+    intro = `Basado en los últimos ${shotsRecientes.length} shots y ${dias}d de tueste de este café.`;
+  }
+
+  document.getElementById('analisis-protocolo-intro').textContent = intro;
+
+  // Build diagnostic steps based on data
+  const pasos = [];
+
+  // Step 1: Verify baseline — reposo
+  pasos.push({
+    urgente: dias > 35,
+    titulo: 'Verificar ventana de tueste',
+    desc: dias > 35
+      ? `Con ${dias} días de tueste el café perdió compuestos aromáticos clave. Compensar activamente: afinar molienda 2–3 puntos respecto a semana 1 y subir temperatura a 93–95°C.`
+      : `Con ${dias} días el café está en ${dias<=21?'zona óptima':'inicio del declive'}. Tener eso como contexto antes de cada ajuste — lo que funciona hoy puede no funcionar en 10 días.`,
+    meta: `${dias}d de tueste · ${getReposoInfo(dias).zona}`
+  });
+
+  // Step 2: Time check
+  if (avgTiempo && avgTiempo < 25) {
+    pasos.push({
+      urgente: true,
+      titulo: 'Corregir tiempo de extracción',
+      desc: `Promedio de ${avgTiempo.toFixed(0)}s es insuficiente para extraer dulzor en lavados. La ventana BH para espresso de calidad es 25–35s. Afinar molienda en pasos de 0.2 hasta superar los 27s. No cambiar ratio hasta que el tiempo esté en rango.`,
+      meta: `Objetivo: 27–32s · Ahora: ~${avgTiempo.toFixed(0)}s`
+    });
+  } else if (!avgTiempo) {
+    pasos.push({
+      urgente: false,
+      titulo: 'Registrar tiempo en cada shot',
+      desc: 'El tiempo de extracción es la variable más diagnóstica del sistema. Sin tiempo no se puede saber si la molienda es correcta. Registrar siempre antes de mirar TDS o extracción.',
+      meta: 'Objetivo: 27–32s para lavados · Agregar en campo Tiempo'
+    });
+  }
+
+  // Step 3: Extraction check
+  if (avgExt && avgExt < 18) {
+    pasos.push({
+      urgente: true,
+      titulo: 'Subir extracción al rango 18–22%',
+      desc: `Extracción promedio ${avgExt.toFixed(1)}% — el dulzor en Caturra/Castillo lavado vive entre 18–20%. Por debajo de ese piso el agua no llegó a los azúcares. Si el tiempo ya es correcto (27–32s), revisar distribución del puck y temperatura del agua.`,
+      meta: `Objetivo: 18–22% · Ahora: ~${avgExt.toFixed(1)}%`
+    });
+  }
+
+  // Step 4: Texture check
+  if (texturasDom) {
+    const texNeg = texturasNeg.map(s=>s.sensorial.textura);
+    const freq = {};
+    texNeg.forEach(t=>freq[t]=(freq[t]||0)+1);
+    const masFreq = Object.entries(freq).sort((a,b)=>b[1]-a[1])[0];
+    pasos.push({
+      urgente: false,
+      titulo: 'Resolver textura irregular',
+      desc: masFreq[0]==='Áspero'||masFreq[0]==='Corrosivo'||masFreq[0]==='Arenoso'
+        ? `"${masFreq[0]}" aparece en ${masFreq[1]} de los últimos shots — señal de canales en el puck. Antes de tocar molienda o ratio, revisar distribución (WDT o declive) y tamping nivelado. Los canales hacen que el TDS sea errático y la extracción engañosa.`
+        : `"${masFreq[0]}" recurrente indica ${masFreq[0]==='Acuoso'?'ratio demasiado abierto o molienda muy gruesa':masFreq[0]==='Astringente'?'sobre-extracción o temperatura alta':'un patrón a resolver en receta'}.`,
+      meta: `${masFreq[0]}: ${masFreq[1]}x en últimos shots`
+    });
+  }
+
+  // Step 5: Cata connection
+  if (cata) {
+    pasos.push({
+      urgente: false,
+      titulo: 'Usar la cata como brújula sensorial',
+      desc: `La cata registrada muestra Acidez ${cata.acidez}/3 · Dulzor ${cata.dulzor}/3 · Posgusto ${cata.posgusto}/3. Cuando el espresso se siente plano o sin definición, comparar con esos valores: ¿el dulzor está apareciendo en la taza al mismo nivel que en cupping? Si no, la extracción todavía no llegó ahí.`,
+      meta: 'Comparar cupping vs espresso · Cata semana ' + (cata.semana||'actual')
+    });
+  } else {
+    pasos.push({
+      urgente: false,
+      titulo: 'Hacer cata de referencia esta semana',
+      desc: 'Sin cata no hay mapa sensorial para este café. El cupping clásico (molienda gruesa, agua a 93°C, 4 min) revela el techo del café — qué tanto dulzor, qué acidez, qué posgusto tiene disponible. Eso es el objetivo que el espresso tiene que alcanzar.',
+      meta: 'Ir a tab Cata → cargar valores'
+    });
+  }
+
+  // Step 6: Temp/pressure
+  pasos.push({
+    urgente: false,
+    titulo: 'Temperatura y presión como ajuste fino',
+    desc: 'Una vez que tiempo y ratio están en rango, la temperatura es la palanca más precisa para el dulzor. +1°C extrae más solubles — útil con cafés con más días de tueste. La presión (9 bar clásico vs 6–7 bar para perfiles de baja presión) cambia la textura y la velocidad de extracción. Registrarlas en "Temperatura · Presión · Reposo" del formulario.',
+    meta: 'Temp: 92–94°C · Presión: 9 bar (estándar Undici)'
+  });
+
+  const pasosEl = document.getElementById('analisis-protocolo-pasos');
+  pasosEl.innerHTML = pasos.map((p,i)=>`
+    <div class="protocolo-paso">
+      <div class="paso-num${p.urgente?' urgente':''}">${i+1}</div>
+      <div class="paso-body">
+        <div class="paso-titulo">${p.titulo}${p.urgente?' <span style="font-size:0.7rem;color:var(--accent);font-weight:normal">· prioritario</span>':''}</div>
+        <div class="paso-desc">${p.desc}</div>
+        <div class="paso-meta">${p.meta}</div>
+      </div>
+    </div>`).join('');
+}
+
+function renderPatrones(shots) {
+  const el = document.getElementById('analisis-patrones');
+  document.getElementById('analisis-total-shots').textContent = shots.length + ' shots';
+
+  if (shots.length < 2) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-text">Necesitás al menos 2 shots registrados para ver patrones.</div></div>';
+    return;
+  }
+
+  const withExt = shots.filter(s=>s.receta.extraccion&&s.receta.extraccion!='—');
+  const withTiempo = shots.filter(s=>s.receta.tiempo&&s.receta.tiempo!='—');
+  const withTDS = shots.filter(s=>s.receta.tds&&s.receta.tds!='—');
+
+  const avgExt = withExt.length ? withExt.reduce((a,s)=>a+parseFloat(s.receta.extraccion),0)/withExt.length : null;
+  const avgTiempo = withTiempo.length ? withTiempo.reduce((a,s)=>a+parseFloat(s.receta.tiempo),0)/withTiempo.length : null;
+  const avgTDS = withTDS.length ? withTDS.reduce((a,s)=>a+parseFloat(s.receta.tds),0)/withTDS.length : null;
+
+  const texFreq = {};
+  shots.forEach(s=>{ if(s.sensorial?.textura) texFreq[s.sensorial.textura]=(texFreq[s.sensorial.textura]||0)+1; });
+  const texTop = Object.entries(texFreq).sort((a,b)=>b[1]-a[1]).slice(0,3);
+
+  const diagFreq = {ok:0,warn:0,bad:0};
+  shots.forEach(s=>{ if(s.diagnostico) diagFreq[s.diagnostico.lvl]++; });
+
+  const dulzorProm = shots.filter(s=>s.sensorial?.dulzor).reduce((a,s)=>a+s.sensorial.dulzor,0) / shots.filter(s=>s.sensorial?.dulzor).length || 0;
+
+  // Ext trend (last 5 vs previous 5)
+  let tendencia = null;
+  if (withExt.length >= 6) {
+    const rec = withExt.slice(-5).reduce((a,s)=>a+parseFloat(s.receta.extraccion),0)/5;
+    const prev = withExt.slice(-10,-5).reduce((a,s)=>a+parseFloat(s.receta.extraccion),0)/Math.min(5,withExt.slice(-10,-5).length);
+    tendencia = rec - prev;
+  }
+
+  const rows = [];
+  if (avgExt) {
+    const extColor = avgExt < 18 ? 'var(--danger)' : avgExt <= 22 ? 'var(--green)' : 'var(--warn)';
+    rows.push(`<div class="patron-row"><span class="patron-label">Extracción promedio</span><span class="patron-val" style="color:${extColor}">${avgExt.toFixed(1)}%</span></div>`);
+  }
+  if (avgTDS) rows.push(`<div class="patron-row"><span class="patron-label">TDS promedio</span><span class="patron-val">${avgTDS.toFixed(2)}%</span></div>`);
+  if (avgTiempo) {
+    const tColor = avgTiempo < 25 ? 'var(--danger)' : avgTiempo <= 35 ? 'var(--green)' : 'var(--warn)';
+    rows.push(`<div class="patron-row"><span class="patron-label">Tiempo promedio</span><span class="patron-val" style="color:${tColor}">${avgTiempo.toFixed(0)}s</span></div>`);
+  }
+  if (dulzorProm) rows.push(`<div class="patron-row"><span class="patron-label">Dulzor promedio (escala 1–3)</span><span class="patron-val">${dulzorProm.toFixed(1)}</span></div>`);
+  rows.push(`<div class="patron-row"><span class="patron-label">Shots logrados</span><span class="patron-val" style="color:var(--green)">${diagFreq.ok} de ${shots.length}</span></div>`);
+  rows.push(`<div class="patron-row"><span class="patron-label">Shots con problema</span><span class="patron-val" style="color:var(--danger)">${diagFreq.bad}</span></div>`);
+  if (texTop.length) rows.push(`<div class="patron-row"><span class="patron-label">Textura más frecuente</span><span class="patron-val">${texTop[0][0]} (${texTop[0][1]}x)</span></div>`);
+  if (tendencia !== null) {
+    const arrow = tendencia > 0.5 ? '↑ subiendo' : tendencia < -0.5 ? '↓ bajando' : '→ estable';
+    rows.push(`<div class="patron-row"><span class="patron-label">Tendencia extracción (últimos 10)</span><span class="patron-val">${arrow} ${tendencia > 0 ? '+' : ''}${tendencia.toFixed(1)}%</span></div>`);
+  }
+
+  el.innerHTML = rows.join('');
+
+  // Add a simple visual ext range
+  if (withExt.length >= 3) {
+    const extVals = withExt.slice(-10).map(s=>parseFloat(s.receta.extraccion));
+    const minE = Math.min(...extVals), maxE = Math.max(...extVals);
+    el.innerHTML += `
+      <div style="margin-top:0.5rem">
+        <div style="font-family:'DM Mono',monospace;font-size:0.58rem;color:var(--ink3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px">Rango extracción · últimos ${extVals.length} shots</div>
+        <div style="position:relative;height:24px;background:var(--bg2);border-radius:12px;overflow:hidden">
+          <!-- BH window 18-22 -->
+          <div style="position:absolute;left:${Math.max(0,(18-10)/20*100)}%;width:${4/20*100}%;height:100%;background:rgba(58,107,62,0.2);top:0"></div>
+          <!-- Actual range -->
+          <div style="position:absolute;left:${Math.max(0,(minE-10)/20*100)}%;width:${Math.min(100,(maxE-minE)/20*100)}%;height:100%;background:var(--accent2);opacity:0.6;top:0;border-radius:12px"></div>
+          <!-- Avg dot -->
+          ${avgExt ? `<div style="position:absolute;left:calc(${Math.max(0,(avgExt-10)/20*100)}% - 12px);top:2px;width:20px;height:20px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:0.5rem;color:#fff">${avgExt.toFixed(0)}</div>` : ''}
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:4px">
+          <span style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--ink3)">${minE.toFixed(1)}%</span>
+          <span style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--green)">18–22% BH</span>
+          <span style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--ink3)">${maxE.toFixed(1)}%</span>
+        </div>
+      </div>`;
+  }
+}
+
+function renderMejores(shots) {
+  const el = document.getElementById('analisis-mejores');
+  const mejores = shots.filter(s=>s.favorito || s.diagnostico?.lvl==='ok').slice(-6).reverse();
+  if (!mejores.length) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-text">Todavía no hay shots marcados como favoritos o logrados.</div></div>';
+    return;
+  }
+  el.innerHTML = mejores.map(s=>`
+    <div style="padding:8px 0;border-bottom:1px solid var(--border2);cursor:pointer" onclick="openShotModal('${s.id}')">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+        <span class="hist-barista ${s.baristaKey}" style="display:inline-block">${s.barista} · ${s.fecha}</span>
+        <div style="display:flex;gap:6px;align-items:center">
+          ${s.favorito?'<span>⭐</span>':''}
+          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--green)">✓ logrado</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        ${s.receta.molienda!='—'?`<span style="font-family:'DM Mono',monospace;font-size:0.72rem;color:var(--ink2)">mol ${s.receta.molienda}</span>`:''}
+        ${s.receta.rendimiento!='—'?`<span style="font-family:'DM Mono',monospace;font-size:0.72rem;color:var(--ink2)">${s.receta.rendimiento}g</span>`:''}
+        ${s.receta.tiempo!='—'?`<span style="font-family:'DM Mono',monospace;font-size:0.72rem;color:var(--ink2)">${s.receta.tiempo}s</span>`:''}
+        ${s.receta.extraccion!='—'?`<span style="font-family:'DM Mono',monospace;font-size:0.72rem;color:var(--green)">${s.receta.extraccion}%</span>`:''}
+        ${s.receta.tds!='—'?`<span style="font-family:'DM Mono',monospace;font-size:0.72rem;color:var(--ink3)">TDS ${s.receta.tds}</span>`:''}
+      </div>
+      ${s.sensorial?.textura?`<div style="font-size:0.7rem;color:var(--ink3);margin-top:2px;font-style:italic">${s.sensorial.textura}${s.sensorial.curva?' · '+s.sensorial.curva:''}</div>`:''}
+    </div>`).join('');
+}
+
+// ══ ANÁLISIS EXPERTO IA ══
+let _lastIADecision = null;
+
+function buildContextoCompleto() {
+  const r = getRecetaActual();
+  const cafe = state.cafes.find(c=>c.id===state.cafeActivo);
+  const dias = cafe ? calcDays(cafe.tueste) : null;
+  const cata = (state.catas||{})[getCataKey(state.cafeActivo)];
+  const shotsRecientes = state.shots.filter(s=>s.cafeId===state.cafeActivo).slice(-5);
+  const clima = state.turnoClima;
+
+  return {
+    cafe: cafe ? {
+      nombre: cafe.nombre,
+      proceso: cafe.proceso,
+      diasDeTueste: dias,
+      tuesteISO: cafe.tueste
+    } : null,
+    shotActual: {
+      sensorial: {
+        acidez: state.form.acidez,
+        dulzor: state.form.dulzor,
+        posgusto: state.form.posgusto,
+        cuerpo: state.form.cuerpo,
+        textura: state.form.textura,
+        curvaBalance: state.form.curva
+      },
+      receta: {
+        dosis: r.dosis,
+        molienda: r.molienda,
+        rendimiento: r.rendimiento,
+        tiempo: r.tiempo,
+        tds: r.tds,
+        extraccion: r.extraccion,
+        temperatura: r.temp,
+        presion: r.presion,
+        diasReposo: r.reposo || dias
+      }
+    },
+    cataSemanal: cata ? {
+      acidez: cata.acidez,
+      dulzor: cata.dulzor,
+      posgusto: cata.posgusto,
+      cuerpo: cata.cuerpo,
+      textura: cata.textura,
+      notas: cata.notas
+    } : null,
+    historial: shotsRecientes.map(s=>({
+      fecha: s.fecha,
+      textura: s.sensorial?.textura,
+      curva: s.sensorial?.curva,
+      dulzor: s.sensorial?.dulzor,
+      molienda: s.receta.molienda,
+      rendimiento: s.receta.rendimiento,
+      tiempo: s.receta.tiempo,
+      tds: s.receta.tds,
+      extraccion: s.receta.extraccion,
+      decision: s.decision,
+      diagnostico: s.diagnostico?.lvl
+    })),
+    clima: clima ? { emoji: clima.emoji, label: clima.label, temp: clima.temp, humedad: clima.hum } : null,
+    molino: 'Mahlkonig E65S',
+    maquina: 'Casadio Undici WD'
+  };
+}
+
+function buildPromptIA(ctx) {
+  const c = ctx;
+  const cafe = c.cafe;
+  const shot = c.shotActual;
+  const cata = c.cataSemanal;
+  const hist = c.historial;
+
+  const cafeStr = cafe
+    ? `Café: ${cafe.nombre} (${cafe.proceso}), ${cafe.diasDeTueste} días de tueste.`
+    : 'Café: no especificado.';
+
+  const shotStr = `
+Shot actual:
+- Sensorial: Acidez ${shot.sensorial.acidez}/3, Dulzor ${shot.sensorial.dulzor}/3, Posgusto ${shot.sensorial.posgusto}/3, Cuerpo ${shot.sensorial.cuerpo}/3
+- Textura en lengua: ${shot.sensorial.textura || 'no registrada'}
+- Curva de balance: ${shot.sensorial.curvaBalance || 'no registrada'}
+- Receta: ${shot.receta.dosis}g dosis, molienda ${shot.receta.molienda || '?'}, rendimiento ${shot.receta.rendimiento || '?'}g, tiempo ${shot.receta.tiempo || '?'}s
+- TDS: ${shot.receta.tds || '?'}%, Extracción: ${shot.receta.extraccion || '?'}%
+- Temperatura agua: ${shot.receta.temperatura || 'no registrada'}°C, Presión: ${shot.receta.presion || 'no registrada'} bar
+- Días reposo: ${shot.receta.diasReposo || cafe?.diasDeTueste || '?'}`.trim();
+
+  const cataStr = cata
+    ? `\nCata de referencia esta semana:\n- Acidez ${cata.acidez}/3, Dulzor ${cata.dulzor}/3, Posgusto ${cata.posgusto}/3, Cuerpo ${cata.cuerpo}/3\n- Textura en cupping: ${cata.textura||'—'}\n${cata.notas?'- Notas: '+cata.notas:''}`
+    : `\nSin cata de referencia registrada esta semana.`;
+
+  const histStr = hist.length
+    ? `\nÚltimos shots (contexto):\n` + hist.map((s,i)=>`${i+1}. Molienda ${s.molienda||'?'}, ${s.rendimiento||'?'}g, ${s.tiempo||'?'}s → textura ${s.textura||'?'}, dulzor ${s.dulzor||'?'}/3, extracción ${s.extraccion||'?'}%, decisión: "${s.decision||'—'}"`).join('\n')
+    : `\nSin historial previo para este café.`;
+
+  const equipoStr = `\nEquipo: Molino ${c.molino}, Máquina ${c.maquina}.`;
+  const climaStr = c.clima?.label ? `\nClima del turno: ${c.clima.label}${c.clima.temp?' · '+c.clima.temp+'°C':''}.` : '';
+
+  return `Sos un experto en espresso con el conocimiento combinado de James Hoffmann, Lance Hedrick, Barista Hustle y Coffee Sensorium. Analizás shots de espresso con rigor técnico y sensorial, siempre considerando todas las variables en conjunto.
+
+${cafeStr}${shotStr}${cataStr}${histStr}${equipoStr}${climaStr}
+
+Con todos estos datos, analizá este shot y respondé en JSON con exactamente esta estructura (sin texto fuera del JSON, sin markdown):
+
+{
+  "diagnostico_real": "1–2 oraciones: cuál es el problema principal del shot, explicando la causa raíz. Sé preciso, no genérico.",
+  "opcion_principal": {
+    "palanca": "molienda|ratio|distribucion|temperatura|presion",
+    "accion_concreta": "Instrucción exacta con números: qué cambiar, cuánto, de X a Y.",
+    "razonamiento": "3–4 oraciones explicando por qué esta es la mejor opción y no otra. Conectar la causa del problema con el mecanismo de este ajuste. Usar datos del historial si son relevantes.",
+    "que_esperar": "Qué va a cambiar en el próximo shot sensorialmente y en los números (TDS, extracción, tiempo estimado).",
+    "riesgo": "Qué puede salir mal si se aplica este ajuste y cómo detectarlo."
+  },
+  "opcion_alternativa": {
+    "palanca": "molienda|ratio|distribucion|temperatura|presion",
+    "accion_concreta": "Instrucción exacta con números.",
+    "razonamiento": "2–3 oraciones: cuándo esta opción tiene más sentido que la principal y por qué podría ser mejor en este contexto específico.",
+    "que_esperar": "Qué cambia sensorialmente y en números.",
+    "riesgo": "Qué puede salir mal."
+  },
+  "decision_sugerida": "Texto listo para copiar al campo 'Decisión tomada'. Conciso, en primera persona, con los números exactos.",
+  "si_no_funciona": "Si el próximo shot con el ajuste principal tampoco resuelve el problema, cuál sería el próximo diagnóstico y qué variable revisar."
+}`;
+}
+
+async function pedirAnalisisIA() {
+  const t = state.form.textura;
+  const c = state.form.curva;
+  if (!t || !c) {
+    alert('Completá al menos textura y curva de balance antes de pedir análisis.');
+    return;
+  }
+
+  const card = document.getElementById('ai-analisis-card');
+  const loading = document.getElementById('ai-loading');
+  const response = document.getElementById('ai-response');
+  const applyRow = document.getElementById('ai-apply-row');
+  const btnLabel = document.getElementById('btn-ai-label');
+
+  card.style.display = 'block';
+  loading.style.display = 'flex';
+  response.style.display = 'none';
+  applyRow.style.display = 'none';
+  btnLabel.textContent = 'Analizando...';
+  card.scrollIntoView({behavior:'smooth', block:'nearest'});
+
+  const ctx = buildContextoCompleto();
+  const prompt = buildPromptIA(ctx);
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: 'Sos un experto en espresso. Respondé ÚNICAMENTE con JSON válido, sin texto antes ni después, sin bloques de código markdown.',
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    const data = await res.json();
+    const rawText = data.content?.map(b => b.text || '').join('') || '';
+
+    let parsed;
+    try {
+      const clean = rawText.replace(/```json|```/g, '').trim();
+      parsed = JSON.parse(clean);
+    } catch(e) {
+      throw new Error('No se pudo parsear la respuesta: ' + rawText.slice(0, 120));
+    }
+
+    _lastIADecision = parsed.decision_sugerida || null;
+    renderRespuestaIA(parsed);
+    loading.style.display = 'none';
+    response.style.display = 'flex';
+    applyRow.style.display = _lastIADecision ? 'block' : 'none';
+    btnLabel.textContent = 'Análisis experto';
+
+  } catch(err) {
+    loading.style.display = 'none';
+    response.style.display = 'flex';
+    response.innerHTML = `<div style="color:var(--accent2);font-size:0.8rem">Error al conectar con el análisis: ${err.message}</div>`;
+    btnLabel.textContent = 'Análisis experto';
+  }
+}
+
+function renderRespuestaIA(data) {
+  const el = document.getElementById('ai-response');
+
+  function seccion(titulo, contenido, highlight) {
+    return `<div>
+      <div class="ai-section-title">${titulo}</div>
+      <div class="ai-section-body" ${highlight ? 'style="color:var(--accent2)"' : ''}>${contenido}</div>
+    </div>`;
+  }
+
+  function opcionCard(op, label) {
+    if (!op) return '';
+    const tagColor = {molienda:'var(--accent2)', ratio:'var(--gold)', distribucion:'var(--green)', temperatura:'rgba(245,240,232,0.5)', presion:'rgba(245,240,232,0.5)'}[op.palanca] || 'var(--accent2)';
+    return `<div style="background:rgba(245,240,232,0.05);border:1px solid rgba(245,240,232,0.1);border-radius:var(--r-sm);padding:0.85rem;display:flex;flex-direction:column;gap:0.6rem">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <span style="font-family:'DM Mono',monospace;font-size:0.58rem;color:rgba(245,240,232,0.5);letter-spacing:0.1em;text-transform:uppercase">${label}</span>
+        <span style="font-family:'DM Mono',monospace;font-size:0.58rem;padding:2px 8px;border-radius:4px;border:1px solid ${tagColor};color:${tagColor};letter-spacing:0.06em;text-transform:uppercase">${op.palanca}</span>
+      </div>
+      <div style="font-weight:600;font-size:0.88rem;color:rgba(245,240,232,0.95);line-height:1.3">${op.accion_concreta}</div>
+      <div style="font-size:0.78rem;color:rgba(245,240,232,0.7);line-height:1.6">${op.razonamiento}</div>
+      <div style="background:rgba(245,240,232,0.04);border-radius:6px;padding:0.55rem 0.7rem;display:flex;flex-direction:column;gap:4px">
+        <div style="font-family:'DM Mono',monospace;font-size:0.56rem;color:var(--gold);letter-spacing:0.1em;text-transform:uppercase">Qué esperar</div>
+        <div style="font-size:0.76rem;color:rgba(245,240,232,0.75);line-height:1.5">${op.que_esperar}</div>
+      </div>
+      <div style="background:rgba(200,82,26,0.08);border-radius:6px;padding:0.5rem 0.7rem;display:flex;flex-direction:column;gap:4px">
+        <div style="font-family:'DM Mono',monospace;font-size:0.56rem;color:var(--accent2);letter-spacing:0.1em;text-transform:uppercase">Riesgo</div>
+        <div style="font-size:0.76rem;color:rgba(245,240,232,0.65);line-height:1.5">${op.riesgo}</div>
+      </div>
+    </div>`;
+  }
+
+  el.innerHTML = [
+    seccion('Diagnóstico real', data.diagnostico_real),
+    opcionCard(data.opcion_principal, 'Opción principal'),
+    opcionCard(data.opcion_alternativa, 'Opción alternativa'),
+    data.si_no_funciona ? seccion('Si no funciona · siguiente paso', data.si_no_funciona) : ''
+  ].filter(Boolean).join('');
+}
+
+function aplicarDesdeIA() {
+  if (_lastIADecision) {
+    document.getElementById('inp-decision').value = _lastIADecision;
+    document.getElementById('inp-decision').scrollIntoView({behavior:'smooth', block:'nearest'});
+  }
+}
+
+function cerrarAnalisisIA() {
+  document.getElementById('ai-analisis-card').style.display = 'none';
+  document.getElementById('btn-ai-label').textContent = 'Análisis experto';
+}
+
+// ══ CLIMA MODAL ══
+function openClimaModal() {
+  const c = state.turnoClima || {};
+  document.querySelectorAll('#clima-iconos-modal .clima-btn').forEach(b => {
+    b.classList.toggle('selected', b.dataset.clima === c.emoji);
+  });
+  document.getElementById('clima-temp-modal').value = c.temp || '';
+  document.getElementById('clima-hum-modal').value = c.hum || '';
+  document.getElementById('modal-clima').classList.add('open');
+}
+function closeClimaModal(e) {
+  if (!e || e.target === document.getElementById('modal-clima'))
+    document.getElementById('modal-clima').classList.remove('open');
+}
+function setClimaModal(btn) {
+  document.querySelectorAll('#clima-iconos-modal .clima-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+function saveClimaModal() {
+  const selected = document.querySelector('#clima-iconos-modal .clima-btn.selected');
+  state.turnoClima = {
+    emoji: selected ? selected.dataset.clima : (state.turnoClima ? state.turnoClima.emoji : null),
+    label: selected ? selected.dataset.label : (state.turnoClima ? state.turnoClima.label : null),
+    temp: document.getElementById('clima-temp-modal').value || null,
+    hum: document.getElementById('clima-hum-modal').value || null
+  };
+  if (state.turnoClima.emoji) {
+    document.getElementById('clima-header-btn').textContent = state.turnoClima.emoji;
+  }
+  closeClimaModal();
+}
+
+// ══ ESTRELLA ══
+function toggleStar() {
+  state.form.favorito = !state.form.favorito;
+  const icon = document.getElementById('star-icon');
+  const label = document.getElementById('star-label');
+  const btn = document.getElementById('star-btn');
+  if (state.form.favorito) {
+    icon.textContent = '⭐';
+    icon.style.opacity = '1';
+    label.textContent = 'Receta marcada como favorita';
+    btn.style.background = 'color-mix(in srgb, var(--gold) 10%, var(--card))';
+    btn.style.borderColor = 'rgba(184,150,46,0.4)';
+  } else {
+    icon.textContent = '☆';
+    icon.style.opacity = '0.3';
+    label.textContent = 'Marcar como receta favorita';
+    btn.style.background = '';
+    btn.style.borderColor = '';
+  }
+}
+
+// ══ CATA SEMANAL ══
+let cataForm = { acidez:0, dulzor:0, posgusto:0, cuerpo:0, textura:'', notas:'' };
+
+function getWeekKey() {
+  const d = new Date();
+  const jan1 = new Date(d.getFullYear(), 0, 1);
+  const week = Math.ceil(((d - jan1) / 86400000 + jan1.getDay() + 1) / 7);
+  return d.getFullYear() + '-W' + week;
+}
+
+function setCataScale(dim, val) {
+  cataForm[dim] = val;
+  document.querySelectorAll('#cata-scale-' + dim + ' .scale-btn').forEach(b => {
+    b.classList.toggle('selected', parseInt(b.textContent) === val);
+  });
+  updateCataPreview();
+}
+
+function updateCataPreview() {
+  const a = cataForm.acidez, d = cataForm.dulzor, p = cataForm.posgusto;
+  if (!a && !d && !p) { document.getElementById('cata-preview-wrap').style.display='none'; return; }
+  document.getElementById('cata-preview-wrap').style.display='block';
+  renderCurvaChart('cata-preview-chart', a, d, p, 60);
+}
+
+function renderCurvaChart(elId, a, d, p, maxH) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  const barW = el.offsetWidth / 3 || 60;
+  const scale = (v) => v ? Math.round((v / 3) * maxH) : 4;
+  // Smooth curve path using SVG
+  const pts = [
+    [barW * 0.5, maxH - scale(a)],
+    [barW * 1.5, maxH - scale(d)],
+    [barW * 2.5, maxH - scale(p)]
+  ];
+  // Catmull-rom to bezier
+  function catmull(p0, p1, p2, p3) {
+    return `C ${p1[0] + (p2[0]-p0[0])/6} ${p1[1] + (p2[1]-p0[1])/6}, ${p2[0] - (p3[0]-p1[0])/6} ${p2[1] - (p3[1]-p1[1])/6}, ${p2[0]} ${p2[1]}`;
+  }
+  const w = barW * 3;
+  const extended = [
+    [pts[0][0] - barW, pts[0][1]],
+    ...pts,
+    [pts[2][0] + barW, pts[2][1]]
+  ];
+  let path = `M ${pts[0][0]} ${pts[0][1]} `;
+  path += catmull(extended[0], extended[1], extended[2], extended[3]) + ' ';
+  path += catmull(extended[1], extended[2], extended[3], extended[4]);
+
+  const colors = { ok: 'var(--gold)', warn: 'var(--accent)' };
+  const isParabola = d >= a && d >= p;
+  const lineColor = isParabola ? 'var(--gold)' : 'var(--accent2)';
+
+  el.innerHTML = `<svg width="100%" height="${maxH}" viewBox="0 0 ${w} ${maxH}" style="overflow:visible">
+    <defs>
+      <linearGradient id="cg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="${lineColor}" stop-opacity="0.15"/>
+        <stop offset="100%" stop-color="${lineColor}" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+    <path d="${path} L ${pts[2][0]} ${maxH} L ${pts[0][0]} ${maxH} Z" fill="url(#cg)"/>
+    <path d="${path}" fill="none" stroke="${lineColor}" stroke-width="2.5" stroke-linecap="round"/>
+    ${pts.map((pt,i) => `<circle cx="${pt[0]}" cy="${pt[1]}" r="4" fill="${lineColor}"/>
+      <text x="${pt[0]}" y="${pt[1]-8}" text-anchor="middle" font-family="DM Mono,monospace" font-size="10" fill="${lineColor}">${[a,d,p][i]||''}</text>`).join('')}
+  </svg>`;
+}
+
+function getCataKey(cafeId) {
+  return 'cata:' + cafeId + ':' + getWeekKey();
+}
+
+function renderCata() {
+  const cafeId = state.cafeActivo;
+  const cafe = state.cafes.find(c=>c.id===cafeId);
+
+  // Update cafe info bar
+  if (cafe) {
+    document.getElementById('cata-cafe-nombre').textContent = cafe.nombre;
+    document.getElementById('cata-cafe-meta').textContent = cafe.proceso + ' · Tueste ' + cafe.tueste;
+    const days = calcDays(cafe.tueste);
+    document.getElementById('cata-cafe-dias').textContent = days + 'd de tueste';
+  }
+
+  // Check if cata exists for this week + cafe
+  const key = getCataKey(cafeId);
+  const catas = state.catas || {};
+  const cata = catas[key];
+
+  if (cata) {
+    showCataExistente(cata, cafe);
+  } else {
+    document.getElementById('cata-existente').style.display = 'none';
+    document.getElementById('cata-form').style.display = 'flex';
+  }
+}
+
+function showCataExistente(cata, cafe) {
+  document.getElementById('cata-form').style.display = 'none';
+  document.getElementById('cata-existente').style.display = 'block';
+
+  // Week label
+  document.getElementById('cata-semana-label').textContent = 'Cata · semana ' + getWeekKey();
+  document.getElementById('cata-fecha-label').textContent = cata.fecha;
+  document.getElementById('cata-barista-label').textContent = cata.barista;
+
+  // Values
+  document.getElementById('cv-acidez').textContent = cata.acidez || '—';
+  document.getElementById('cv-dulzor').textContent = cata.dulzor || '—';
+  document.getElementById('cv-posgusto').textContent = cata.posgusto || '—';
+  document.getElementById('cv-cuerpo').textContent = cata.cuerpo || '—';
+  document.getElementById('cv-textura').textContent = cata.textura || '—';
+
+  // Notas
+  if (cata.notas) {
+    document.getElementById('cv-notas-wrap').style.display='block';
+    document.getElementById('cv-notas').textContent = cata.notas;
+  }
+
+  // Render curva
+  setTimeout(() => renderCurvaChart('cata-curva-chart', cata.acidez, cata.dulzor, cata.posgusto, 80), 50);
+
+  // Guía de calibración basada en la cata
+  const a = cata.acidez, d = cata.dulzor, p = cata.posgusto;
+  let guia = '';
+  if (d >= a && d >= p) {
+    guia = 'La curva muestra parábola con dulzor como pico — perfil balanceado. En espresso, buscar que la taza replique esta curva. Punto de partida: ratio 1:2.2 a 1:2.4 con tiempo de 27–31s.';
+  } else if (a > d && a > p) {
+    guia = 'La acidez domina la cata. En espresso puede intensificarse — buscar dulzor como contrapeso. Considerar abrir el ratio (1:2.3–1:2.5) para que el dulzor gane espacio.';
+  } else if (p > d && p > a) {
+    guia = 'El posgusto es el valor dominante. Cuidar que en espresso no se vuelva amargo. Ratio más moderado (1:2–1:2.2) y tiempo controlado en 27–29s.';
+  } else if (a === d && d === p) {
+    guia = 'Curva plana — el café tiene perfil muy uniforme. En espresso, afinar la molienda para abrir el dulzor y crear más contraste entre inicio y final.';
+  } else {
+    guia = 'Perfil a desarrollar. Usar estos valores como referencia y comparar con cada shot del día.';
+  }
+  document.getElementById('cata-guia-text').textContent = guia;
+}
+
+function editarCata() {
+  const cafeId = state.cafeActivo;
+  const key = getCataKey(cafeId);
+  const cata = (state.catas || {})[key];
+  if (cata) {
+    // Reload form with existing values
+    ['acidez','dulzor','posgusto','cuerpo'].forEach(dim => {
+      cataForm[dim] = cata[dim] || 0;
+      document.querySelectorAll('#cata-scale-'+dim+' .scale-btn').forEach(b => {
+        b.classList.toggle('selected', parseInt(b.textContent) === cataForm[dim]);
+      });
+    });
+    document.getElementById('cata-textura').value = cata.textura || '';
+    document.getElementById('cata-notas').value = cata.notas || '';
+  }
+  document.getElementById('cata-existente').style.display='none';
+  document.getElementById('cata-form').style.display='flex';
+  updateCataPreview();
+}
+
+function guardarCata() {
+  if (!state.cafeActivo) { alert('Seleccioná un café primero.'); return; }
+  if (!cataForm.acidez || !cataForm.dulzor || !cataForm.posgusto) {
+    alert('Completá al menos acidez, dulzor y posgusto.'); return;
+  }
+  const key = getCataKey(state.cafeActivo);
+  if (!state.catas) state.catas = {};
+  state.catas[key] = {
+    cafeId: state.cafeActivo,
+    semana: getWeekKey(),
+    fecha: TODAY,
+    barista: state.barista || '—',
+    acidez: cataForm.acidez,
+    dulzor: cataForm.dulzor,
+    posgusto: cataForm.posgusto,
+    cuerpo: cataForm.cuerpo,
+    textura: document.getElementById('cata-textura').value,
+    notas: document.getElementById('cata-notas').value
+  };
+  save();
+  updateCataReferencia();
+  // Reset form
+  cataForm = { acidez:0, dulzor:0, posgusto:0, cuerpo:0, textura:'', notas:'' };
+  document.querySelectorAll('[id^="cata-scale"] .scale-btn').forEach(b=>b.classList.remove('selected'));
+  document.getElementById('cata-textura').value='';
+  document.getElementById('cata-notas').value='';
+  renderCata();
+}
+</script>
+
+<!-- ══ MODAL: CLIMA ══ -->
+<div id="modal-clima" class="modal-overlay" onclick="closeClimaModal(event)">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Clima del turno</div>
+    <div class="clima-iconos" id="clima-iconos-modal">
+      <button class="clima-btn" data-clima="☀️" data-label="Soleado" onclick="setClimaModal(this)">☀️<span>Soleado</span></button>
+      <button class="clima-btn" data-clima="⛅" data-label="Nublado" onclick="setClimaModal(this)">⛅<span>Nublado</span></button>
+      <button class="clima-btn" data-clima="🌧️" data-label="Lluvia" onclick="setClimaModal(this)">🌧️<span>Lluvia</span></button>
+      <button class="clima-btn" data-clima="🌫️" data-label="Húmedo" onclick="setClimaModal(this)">🌫️<span>Húmedo</span></button>
+      <button class="clima-btn" data-clima="❄️" data-label="Frío" onclick="setClimaModal(this)">❄️<span>Frío</span></button>
+      <button class="clima-btn" data-clima="🔥" data-label="Calor" onclick="setClimaModal(this)">🔥<span>Calor</span></button>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:1rem">
+      <div style="flex:1">
+        <div style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--ink3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px">Temp °C</div>
+        <input class="input-field" id="clima-temp-modal" type="number" placeholder="ej. 18">
+      </div>
+      <div style="flex:1">
+        <div style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--ink3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px">Humedad %</div>
+        <input class="input-field" id="clima-hum-modal" type="number" placeholder="ej. 65">
+      </div>
+    </div>
+    <button class="btn-primary" style="margin-top:1rem" onclick="saveClimaModal()">Guardar</button>
+    <button class="btn-secondary" style="margin-top:8px" onclick="closeClimaModal()">Cancelar</button>
+  </div>
+</div>
+</body>
+</html>
