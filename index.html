@@ -1457,7 +1457,14 @@ body { background: var(--bg); color: var(--ink); font-family: 'Instrument Sans',
   <div class="modal" id="modal-shot-content"></div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+// ══ SUPABASE ══
+// Base compartida entre todos los baristas — sin login, todos leen/escriben la misma data.
+const SUPABASE_URL = 'https://gpbzpflnteytslymtqan.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdwYnpwZmxudGV5dHNseW10cWFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU2ODE2NjcsImV4cCI6MjEwMTI1NzY2N30.wBoPyXFnFg4vbQhEo8sR7DDwq0EPsjA5erQTuzvKSKQ';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
 // ══ STATE ══
 let state = {
   barista: null,
@@ -1465,31 +1472,77 @@ let state = {
   cafeActivo: null,
   cafes: [],
   shots: [],
+  catas: {},
   turnoClima: null,
   form: { acidez:0, dulzor:0, posgusto:0, cuerpo:0, textura:null, curva:null, favorito:false }
 };
 
 const TODAY = new Date().toLocaleDateString('es-AR', {day:'2-digit',month:'2-digit',year:'numeric'});
 
-function save() { localStorage.setItem('batata_state', JSON.stringify({cafes:state.cafes,shots:state.shots,cafeActivo:state.cafeActivo,catas:state.catas||{}})); }
-function load() {
-  const d = localStorage.getItem('batata_state');
-  if (d) { const p = JSON.parse(d); state.cafes = p.cafes||[]; state.shots = p.shots||[]; state.cafeActivo = p.cafeActivo||null; state.catas = p.catas||{}; }
-  // Pre-cargar el café de hoy
-  if (!state.cafes.length) {
-    state.cafes = [{ id:'c1', nombre:'Colombia Lavado · Caturra/Castillo', proceso:'Lavado', tueste:'30/04/2026' }];
-    state.cafeActivo = 'c1';
-    save();
-  }
+async function loadAll() {
+  const [cafesRes, shotsRes, catasRes, appStateRes] = await Promise.all([
+    sb.from('cafes').select('*').order('created_at', {ascending:true}),
+    sb.from('shots').select('*').order('created_at', {ascending:true}),
+    sb.from('catas').select('*'),
+    sb.from('app_state').select('*').eq('id',1).maybeSingle()
+  ]);
+  if (cafesRes.error) console.error('Error cargando cafés:', cafesRes.error);
+  if (shotsRes.error) console.error('Error cargando shots:', shotsRes.error);
+  if (catasRes.error) console.error('Error cargando catas:', catasRes.error);
+  if (appStateRes.error) console.error('Error cargando estado compartido:', appStateRes.error);
+
+  state.cafes = cafesRes.data || [];
+  state.shots = (shotsRes.data || []).map(r => ({
+    id: r.id, barista: r.barista, baristaKey: r.barista_key, cafeId: r.cafe_id,
+    fecha: r.fecha, hora: r.hora, sensorial: r.sensorial, receta: r.receta,
+    decision: r.decision, comentario: r.comentario, diagnostico: r.diagnostico,
+    cafe: r.cafe, favorito: r.favorito, clima: r.clima
+  }));
+  state.catas = {};
+  (catasRes.data || []).forEach(c => {
+    state.catas[c.key] = {
+      cafeId: c.cafe_id, semana: c.semana, fecha: c.fecha, barista: c.barista,
+      acidez: c.acidez, dulzor: c.dulzor, posgusto: c.posgusto, cuerpo: c.cuerpo,
+      textura: c.textura, notas: c.notas
+    };
+  });
+  state.cafeActivo = (appStateRes.data && appStateRes.data.cafe_activo) || (state.cafes[0] && state.cafes[0].id) || null;
+}
+
+// Vuelve a pintar lo que está visible con los datos más recientes de Supabase.
+function refreshUI() {
+  updateCafeBar(); updateShotCounter(); updateCataReferencia();
+  const active = document.querySelector('.tab-content.active');
+  if (!active) return;
+  if (active.id === 'tab-historial') renderHist();
+  if (active.id === 'tab-comparar') renderComparativa();
+  if (active.id === 'tab-cata') renderCata();
+  if (active.id === 'tab-analisis') renderAnalisis();
+}
+
+// Cuando otro barista agrega un shot/cafe/cata, este tab se entera sin recargar.
+let realtimeSubscribed = false;
+function subscribeRealtime() {
+  if (realtimeSubscribed) return;
+  realtimeSubscribed = true;
+  const onChange = () => loadAll().then(refreshUI);
+  sb.channel('batata-sync')
+    .on('postgres_changes', {event:'*', schema:'public', table:'cafes'}, onChange)
+    .on('postgres_changes', {event:'*', schema:'public', table:'shots'}, onChange)
+    .on('postgres_changes', {event:'*', schema:'public', table:'catas'}, onChange)
+    .on('postgres_changes', {event:'*', schema:'public', table:'app_state'}, onChange)
+    .subscribe();
 }
 
 // ══ BARISTA ══
-function selectBarista(name, key, shift) {
+async function selectBarista(name, key, shift) {
   state.barista = name; state.baristaKey = key;
   document.getElementById('header-barista-name').textContent = name + ' · ' + shift;
   document.getElementById('screen-welcome').classList.remove('active');
   document.getElementById('screen-main').classList.add('active');
-  load(); updateCafeBar(); updateShotCounter(); renderHist(); renderComparativa(); updateCataReferencia();
+  await loadAll();
+  updateCafeBar(); updateShotCounter(); renderHist(); renderComparativa(); updateCataReferencia();
+  subscribeRealtime();
 }
 function promptCustomBarista() {
   const n = prompt('Nombre:');
@@ -1545,8 +1598,12 @@ function openCafeModal() {
   document.getElementById('modal-cafe').classList.add('open');
 }
 function closeCafeModal(e) { if (!e||e.target===document.getElementById('modal-cafe')) document.getElementById('modal-cafe').classList.remove('open'); }
-function selectCafe(id) { state.cafeActivo=id; save(); updateCafeBar(); closeCafeModal(); updateCataReferencia(); }
-function addCafe() {
+async function selectCafe(id) {
+  state.cafeActivo=id; updateCafeBar(); closeCafeModal(); updateCataReferencia();
+  const {error} = await sb.from('app_state').upsert({id:1, cafe_activo:id, updated_at:new Date().toISOString()});
+  if (error) console.error('Error guardando café activo:', error);
+}
+async function addCafe() {
   const nombre = document.getElementById('new-cafe-nombre').value.trim();
   const proceso = document.getElementById('new-cafe-proceso').value.trim();
   const tuesteRaw = document.getElementById('new-cafe-tueste').value;
@@ -1554,7 +1611,13 @@ function addCafe() {
   let tueste = '—';
   if (tuesteRaw) { const d=new Date(tuesteRaw+'T12:00:00'); tueste=d.getDate().toString().padStart(2,'0')+'/'+(d.getMonth()+1).toString().padStart(2,'0')+'/'+d.getFullYear(); }
   const cafe = { id:'c'+Date.now(), nombre, proceso:proceso||'—', tueste };
-  state.cafes.push(cafe); state.cafeActivo=cafe.id; save();
+  state.cafes.push(cafe); state.cafeActivo=cafe.id;
+  const [{error:cafeErr}, {error:stateErr}] = await Promise.all([
+    sb.from('cafes').insert(cafe),
+    sb.from('app_state').upsert({id:1, cafe_activo:cafe.id, updated_at:new Date().toISOString()})
+  ]);
+  if (cafeErr) console.error('Error guardando café:', cafeErr);
+  if (stateErr) console.error('Error guardando café activo:', stateErr);
   document.getElementById('new-cafe-nombre').value=''; document.getElementById('new-cafe-proceso').value=''; document.getElementById('new-cafe-tueste').value='';
   closeCafeModal(); updateCafeBar(); openCafeModal();
 }
@@ -1918,7 +1981,7 @@ function updateShotCounter() {
   const hoy = state.shots.filter(s=>s.fecha===TODAY);
   document.getElementById('shot-counter').textContent = hoy.length+' registrado(s)';
 }
-function guardarShot() {
+async function guardarShot() {
   if (!state.cafeActivo) { alert('Seleccioná un café primero.'); return; }
   const shot = {
     id: 's'+Date.now(),
@@ -1943,7 +2006,15 @@ function guardarShot() {
     favorito: state.form.favorito || false,
     clima: state.turnoClima ? {...state.turnoClima} : null
   };
-  state.shots.push(shot); save(); updateShotCounter();
+  state.shots.push(shot); updateShotCounter();
+  const row = {
+    id: shot.id, barista: shot.barista, barista_key: shot.baristaKey, cafe_id: shot.cafeId,
+    fecha: shot.fecha, hora: shot.hora, sensorial: shot.sensorial, receta: shot.receta,
+    decision: shot.decision, comentario: shot.comentario, diagnostico: shot.diagnostico,
+    cafe: shot.cafe, favorito: shot.favorito, clima: shot.clima
+  };
+  const {error} = await sb.from('shots').insert(row);
+  if (error) console.error('Error guardando shot:', error);
   resetForm();
   const btn = document.querySelector('.btn-primary');
   btn.textContent='✓ Registrado'; btn.style.background='var(--green)';
@@ -2974,7 +3045,7 @@ function editarCata() {
   updateCataPreview();
 }
 
-function guardarCata() {
+async function guardarCata() {
   if (!state.cafeActivo) { alert('Seleccioná un café primero.'); return; }
   if (!cataForm.acidez || !cataForm.dulzor || !cataForm.posgusto) {
     alert('Completá al menos acidez, dulzor y posgusto.'); return;
@@ -2993,7 +3064,13 @@ function guardarCata() {
     textura: document.getElementById('cata-textura').value,
     notas: document.getElementById('cata-notas').value
   };
-  save();
+  const c = state.catas[key];
+  const {error} = await sb.from('catas').upsert({
+    key, cafe_id: c.cafeId, semana: c.semana, fecha: c.fecha, barista: c.barista,
+    acidez: c.acidez, dulzor: c.dulzor, posgusto: c.posgusto, cuerpo: c.cuerpo,
+    textura: c.textura, notas: c.notas
+  });
+  if (error) console.error('Error guardando cata:', error);
   updateCataReferencia();
   // Reset form
   cataForm = { acidez:0, dulzor:0, posgusto:0, cuerpo:0, textura:'', notas:'' };
