@@ -935,6 +935,7 @@ body { background: var(--bg); color: var(--ink); font-family: 'Instrument Sans',
     <div class="header-right">
       <button class="icon-btn" id="clima-header-btn" onclick="openClimaModal()" title="Clima del turno" style="font-size:1.2rem">—</button>
       <button class="icon-btn" onclick="openCafeModal()" title="Cambiar café">☕</button>
+      <button class="icon-btn" onclick="exportExcel()" title="Descargar Excel">⬇</button>
       <button class="icon-btn" onclick="switchBarista()" title="Cambiar barista">↩</button>
     </div>
   </div>
@@ -1458,6 +1459,7 @@ body { background: var(--bg); color: var(--ink); font-family: 'Instrument Sans',
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
 // ══ SUPABASE ══
 // Base compartida entre todos los baristas — sin login, todos leen/escriben la misma data.
@@ -3078,6 +3080,46 @@ async function guardarCata() {
   document.getElementById('cata-textura').value='';
   document.getElementById('cata-notas').value='';
   renderCata();
+}
+
+// ══ EXPORTAR EXCEL ══
+async function exportExcel() {
+  await loadAll();
+  const cafeById = {};
+  state.cafes.forEach(c => { cafeById[c.id] = c; });
+
+  const shotsRows = [...state.shots].reverse().map(s => {
+    const cafe = cafeById[s.cafeId] || s.cafe || {};
+    const dosis = parseFloat(s.receta.dosis), rend = parseFloat(s.receta.rendimiento);
+    const ratio = (dosis && rend) ? '1:' + (rend/dosis).toFixed(2) : '';
+    return {
+      Fecha: s.fecha, Hora: s.hora, Barista: s.barista,
+      Café: cafe.nombre || '', Proceso: cafe.proceso || '', 'Fecha tueste': cafe.tueste || '',
+      'Dosis (g)': s.receta.dosis, 'Rendimiento (g)': s.receta.rendimiento, Ratio: ratio,
+      'Tiempo (s)': s.receta.tiempo, Molienda: s.receta.molienda, 'TDS %': s.receta.tds, 'Extracción %': s.receta.extraccion,
+      Acidez: s.sensorial.acidez, Dulzor: s.sensorial.dulzor, Posgusto: s.sensorial.posgusto, Cuerpo: s.sensorial.cuerpo,
+      Textura: s.sensorial.textura || '', Curva: s.sensorial.curva || '',
+      Decisión: s.decision, Comentario: s.comentario, Favorito: s.favorito ? 'Sí' : 'No',
+      Clima: s.clima ? (s.clima.emoji + ' ' + (s.clima.label||'')).trim() : '',
+      'Temp clima °C': s.clima ? s.clima.temp : '', 'Humedad clima %': s.clima ? s.clima.hum : ''
+    };
+  });
+
+  const catasRows = Object.values(state.catas || {}).map(c => {
+    const cafe = cafeById[c.cafeId] || {};
+    return { Semana: c.semana, Fecha: c.fecha, Barista: c.barista, Café: cafe.nombre || '',
+      Acidez: c.acidez, Dulzor: c.dulzor, Posgusto: c.posgusto, Cuerpo: c.cuerpo, Textura: c.textura, Notas: c.notas };
+  });
+
+  const cafesRows = state.cafes.map(c => ({ Nombre: c.nombre, Proceso: c.proceso, 'Fecha tueste': c.tueste }));
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(shotsRows), 'Shots');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(catasRows), 'Catas');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(cafesRows), 'Cafés');
+
+  const fname = 'batata-cofi-datos-' + TODAY.replace(/\//g,'-') + '.xlsx';
+  XLSX.writeFile(wb, fname);
 }
 </script>
 
