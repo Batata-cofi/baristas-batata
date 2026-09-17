@@ -2073,6 +2073,15 @@ function renderHist() {
     ${g.shots.map(s=>shotCard(s)).join('')}
   `).join('');
 }
+function recetaResumen(receta) {
+  const parts = [];
+  if (receta.dosis && receta.dosis!=='—') parts.push(receta.dosis+'g');
+  if (receta.rendimiento && receta.rendimiento!=='—') parts.push(receta.rendimiento+'g');
+  if (receta.tiempo && receta.tiempo!=='—') parts.push(receta.tiempo+'s');
+  const receipeStr = parts.join(' × ');
+  const molStr = (receta.molienda && receta.molienda!=='—') ? 'mol '+receta.molienda : '';
+  return [receipeStr, molStr].filter(Boolean).join('  ·  ');
+}
 function shotCard(s) {
   const lvlPill = s.diagnostico ? `<span class="hist-pill ${s.diagnostico.lvl}">${{ok:'✓ Logrado',warn:'⚠ Revisar',bad:'✗ Problema'}[s.diagnostico.lvl]}</span>` : '';
   return `<div class="hist-shot" onclick="openShotModal('${s.id}')">
@@ -2081,7 +2090,7 @@ function shotCard(s) {
       <div style="display:flex;align-items:center;gap:6px">
         ${s.favorito ? '<span style="font-size:0.9rem">⭐</span>' : ''}
         ${s.clima&&s.clima.emoji ? '<span style="font-size:0.85rem" title="'+s.clima.label+(s.clima.temp?'  '+s.clima.temp+'°C':'')+'">'+s.clima.emoji+'</span>' : ''}
-        <span class="hist-time">${s.receta.molienda!='—'?'mol '+s.receta.molienda:''}${s.receta.rendimiento!='—'?' / '+s.receta.rendimiento+'g':''}</span>
+        <span class="hist-time">${recetaResumen(s.receta)}</span>
       </div>
     </div>
     <div class="hist-sensorial">
