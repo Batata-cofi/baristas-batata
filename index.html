@@ -487,6 +487,7 @@ body { background: var(--bg); color: var(--ink); font-family: 'Instrument Sans',
 .hist-pill.ok { background: var(--green-bg); color: var(--green); }
 .hist-pill.warn { background: var(--warn-bg); color: var(--warn); }
 .hist-pill.bad { background: var(--danger-bg); color: var(--danger); }
+.hist-pill.edited { background: var(--bg3); color: var(--ink2); }
 .hist-textura {
   font-size: 0.72rem;
   color: var(--ink2);
@@ -891,8 +892,8 @@ body { background: var(--bg); color: var(--ink); font-family: 'Instrument Sans',
       <button class="barista-btn" onclick="selectBaristaPre('Sofi','sofi','Turno mañana')">
         <span>Sofi</span><span class="shift">Mañana</span>
       </button>
-      <button class="barista-btn" onclick="selectBaristaPre('Cami','cami','Turno tarde')">
-        <span>Cami</span><span class="shift">Tarde</span>
+      <button class="barista-btn" onclick="selectBaristaPre('Lauti','cami','Turno tarde')">
+        <span>Lauti</span><span class="shift">Tarde</span>
       </button>
       <button class="barista-btn-custom" onclick="promptCustomBaristaPre()">+ otra persona</button>
     </div>
@@ -1325,7 +1326,7 @@ body { background: var(--bg); color: var(--ink); font-family: 'Instrument Sans',
       <button class="hist-filter-btn active" onclick="filterHist('all',this)">Todos</button>
       <button class="hist-filter-btn" onclick="filterHist('favoritos',this)">⭐ Favoritos</button>
       <button class="hist-filter-btn" onclick="filterHist('Sofi',this)">Sofi</button>
-      <button class="hist-filter-btn" onclick="filterHist('Cami',this)">Cami</button>
+      <button class="hist-filter-btn" onclick="filterHist('Lauti',this)">Lauti</button>
       <button class="hist-filter-btn" onclick="filterHist('☀️',this)">☀️</button>
       <button class="hist-filter-btn" onclick="filterHist('⛅',this)">⛅</button>
       <button class="hist-filter-btn" onclick="filterHist('🌧️',this)">🌧️</button>
@@ -1353,7 +1354,7 @@ body { background: var(--bg); color: var(--ink); font-family: 'Instrument Sans',
             <div id="stats-sofi" class="compare-metric"><div class="compare-metric-val">—</div><div class="compare-metric-label">shots hoy</div></div>
           </div>
           <div class="compare-card">
-            <div class="compare-who cami">Cami · Tarde</div>
+            <div class="compare-who cami">Lauti · Tarde</div>
             <div class="mini-curva" id="curva-cami"></div>
             <div style="display:flex;justify-content:center;gap:8px;margin-bottom:0.75rem">
               <div class="mini-bar-label"><span class="mini-bar acid" style="display:inline-block;width:8px;height:8px;border-radius:2px"></span> Acid</div>
@@ -1498,7 +1499,7 @@ async function loadAll() {
     id: r.id, barista: r.barista, baristaKey: r.barista_key, cafeId: r.cafe_id,
     fecha: r.fecha, hora: r.hora, sensorial: r.sensorial, receta: r.receta,
     decision: r.decision, comentario: r.comentario, diagnostico: r.diagnostico,
-    cafe: r.cafe, favorito: r.favorito, clima: r.clima
+    cafe: r.cafe, favorito: r.favorito, clima: r.clima, editHistory: r.edit_history || []
   }));
   state.catas = {};
   (catasRes.data || []).forEach(c => {
@@ -2006,7 +2007,8 @@ async function guardarShot() {
     diagnostico: (state.form.textura&&state.form.curva) ? DIAG[state.form.textura+'|'+state.form.curva] : null,
     cafe: state.cafes.find(c=>c.id===state.cafeActivo),
     favorito: state.form.favorito || false,
-    clima: state.turnoClima ? {...state.turnoClima} : null
+    clima: state.turnoClima ? {...state.turnoClima} : null,
+    editHistory: []
   };
   state.shots.push(shot); updateShotCounter();
   const row = {
@@ -2088,6 +2090,7 @@ function shotCard(s) {
       ${s.sensorial.posgusto?`<span class="hist-pill ok">Post ${s.sensorial.posgusto}</span>`:''}
       ${s.sensorial.cuerpo?`<span class="hist-pill warn">Cpo ${s.sensorial.cuerpo}</span>`:''}
       ${lvlPill}
+      ${s.editHistory&&s.editHistory.length?'<span class="hist-pill edited">✎ editado</span>':''}
     </div>
     ${s.sensorial.textura?`<div class="hist-textura">${s.sensorial.textura}${s.sensorial.curva?' · curva '+s.sensorial.curva:''}</div>`:''}
     <div class="hist-decision">↳ ${s.decision}</div>
@@ -2099,15 +2102,20 @@ function openShotModal(id) {
   if (!s) return;
   const cafe = state.cafes.find(c=>c.id===s.cafeId);
   const d = s.diagnostico;
+  const hasHistory = s.editHistory && s.editHistory.length;
   document.getElementById('modal-shot-content').innerHTML = `
     <div class="modal-handle"></div>
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
       <div class="modal-title" style="margin:0">${s.barista} · ${s.hora}</div>
-      <span class="hist-barista ${s.baristaKey}" style="display:inline-block">${s.fecha}</span>
+      <div style="display:flex;align-items:center;gap:8px">
+        ${hasHistory?'<span class="hist-pill edited">✎ editado</span>':''}
+        <button onclick="toggleFavoritoShot('${s.id}')" title="${s.favorito?'Quitar de favoritos':'Marcar como favorita'}" style="background:none;border:none;font-size:1.1rem;cursor:pointer;line-height:1;padding:0">${s.favorito?'⭐':'☆'}</button>
+        <span class="hist-barista ${s.baristaKey}" style="display:inline-block">${s.fecha}</span>
+      </div>
     </div>
     ${cafe?`<div style="font-size:0.8rem;color:var(--ink3);margin-bottom:1rem;font-family:'DM Mono',monospace">${cafe.nombre}</div>`:''}
     <div class="hist-receta" style="flex-wrap:wrap;gap:16px;margin-bottom:1rem">
-      <div class="hist-val"><div class="hist-val-label">Dosis</div><div class="hist-val-num">18g</div></div>
+      <div class="hist-val"><div class="hist-val-label">Dosis</div><div class="hist-val-num">${s.receta.dosis}g</div></div>
       <div class="hist-val"><div class="hist-val-label">Molienda</div><div class="hist-val-num">${s.receta.molienda}</div></div>
       <div class="hist-val"><div class="hist-val-label">Rendimiento</div><div class="hist-val-num">${s.receta.rendimiento}g</div></div>
       <div class="hist-val"><div class="hist-val-label">Tiempo</div><div class="hist-val-num">${s.receta.tiempo}s</div></div>
@@ -2128,17 +2136,168 @@ function openShotModal(id) {
       <div style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px">Comentario</div>
       <div style="font-size:0.85rem;color:var(--ink2);line-height:1.5;font-style:italic">${s.comentario}</div>
     </div>` : ''}
-    <button class="btn-secondary" style="margin-top:1rem" onclick="closeShotModal()">Cerrar</button>
+    ${hasHistory?`<button class="btn-secondary" style="margin-top:1rem" onclick="openVersionHistory('${s.id}')">Ver versiones anteriores (${s.editHistory.length})</button>`:''}
+    <button class="btn-secondary" style="margin-top:0.6rem" onclick="openEditShotForm('${s.id}')">✎ Editar receta</button>
+    <button class="btn-secondary" style="margin-top:0.6rem" onclick="closeShotModal()">Cerrar</button>
   `;
   document.getElementById('modal-shot').classList.add('open');
 }
 function closeShotModal(e) { if (!e||e.target===document.getElementById('modal-shot')) document.getElementById('modal-shot').classList.remove('open'); }
 
+async function toggleFavoritoShot(id) {
+  const s = state.shots.find(x=>x.id===id);
+  if (!s) return;
+  s.favorito = !s.favorito;
+  const {error} = await sb.from('shots').update({favorito: s.favorito}).eq('id', id);
+  if (error) console.error('Error actualizando favorito:', error);
+  openShotModal(id);
+  refreshUI();
+}
+
+function openVersionHistory(id) {
+  const s = state.shots.find(x=>x.id===id);
+  if (!s || !s.editHistory || !s.editHistory.length) return;
+  document.getElementById('modal-shot-content').innerHTML = `
+    <div class="modal-handle"></div>
+    <div class="modal-title" style="margin-bottom:1rem">Versiones anteriores</div>
+    ${s.editHistory.map((v,i)=>versionCard(v, i===0)).join('')}
+    <button class="btn-secondary" style="margin-top:0.6rem" onclick="openShotModal('${id}')">← Volver al shot actual</button>
+  `;
+}
+function versionCard(v, isOriginal) {
+  const fecha = new Date(v.editedAt).toLocaleString('es-AR', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  return `<div class="card" style="margin-bottom:10px">
+    <div style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px">
+      ${isOriginal?'Versión original · reemplazada el '+fecha:'Editado el '+fecha}
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:8px;text-align:center">
+      ${['acidez','dulzor','posgusto','cuerpo'].map(k=>`<div><div style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--ink3);text-transform:uppercase">${k}</div><div style="font-size:1.1rem;font-family:'DM Serif Display',serif">${(v.sensorial&&v.sensorial[k])||'—'}</div></div>`).join('')}
+    </div>
+    <div style="font-size:0.78rem;color:var(--ink2)">Dosis ${v.receta.dosis}g · Mol ${v.receta.molienda} · Rend ${v.receta.rendimiento}g · ${v.receta.tiempo}s</div>
+    ${v.sensorial&&v.sensorial.textura?`<div style="font-size:0.78rem;color:var(--ink2);margin-top:4px">${v.sensorial.textura}${v.sensorial.curva?' · '+v.sensorial.curva:''}</div>`:''}
+    <div style="font-size:0.78rem;color:var(--ink2);margin-top:6px">↳ ${v.decision}</div>
+    ${v.comentario?`<div style="font-size:0.75rem;color:var(--ink3);font-style:italic;margin-top:4px">"${v.comentario}"</div>`:''}
+    ${v.favorito?'<div style="margin-top:4px">⭐</div>':''}
+  </div>`;
+}
+
+// ══ EDITAR SHOT CERRADO ══
+let editForm = null;
+const TEXTURAS_POS = ['Sedoso','Aterciopelado','Cremoso'];
+const TEXTURAS_NEG = ['Áspero','Astringente','Seco','Acuoso','Corrosivo','Arenoso'];
+
+function openEditShotForm(id) {
+  const s = state.shots.find(x=>x.id===id);
+  if (!s) return;
+  editForm = {
+    shotId: id,
+    acidez: s.sensorial.acidez||0, dulzor: s.sensorial.dulzor||0,
+    posgusto: s.sensorial.posgusto||0, cuerpo: s.sensorial.cuerpo||0,
+    textura: s.sensorial.textura||null, curva: s.sensorial.curva||null
+  };
+  const scaleRow = (dim, label) => `
+    <div style="flex:1;min-width:70px">
+      <div class="form-label" style="text-align:center">${label}</div>
+      <div class="scale-btns" id="edit-scale-${dim}">
+        ${[1,2,3].map(v=>`<button class="scale-btn${editForm[dim]===v?' selected':''}" onclick="setEditScale('${dim}',${v})">${v}</button>`).join('')}
+      </div>
+    </div>`;
+  document.getElementById('modal-shot-content').innerHTML = `
+    <div class="modal-handle"></div>
+    <div class="modal-title" style="margin-bottom:1rem">Editar receta · ${s.barista} · ${s.hora}</div>
+    <div class="form-label">Receta</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1rem">
+      <input class="input-field" id="edit-dosis" type="number" placeholder="Dosis (g)" value="${s.receta.dosis!=='—'?s.receta.dosis:''}">
+      <input class="input-field" id="edit-molienda" type="number" placeholder="Molienda" value="${s.receta.molienda!=='—'?s.receta.molienda:''}">
+      <input class="input-field" id="edit-rendimiento" type="number" placeholder="Rendimiento (g)" value="${s.receta.rendimiento!=='—'?s.receta.rendimiento:''}">
+      <input class="input-field" id="edit-tiempo" type="number" placeholder="Tiempo (s)" value="${s.receta.tiempo!=='—'?s.receta.tiempo:''}">
+      <input class="input-field" id="edit-tds" type="number" placeholder="TDS %" value="${s.receta.tds!=='—'?s.receta.tds:''}">
+      <input class="input-field" id="edit-extraccion" type="number" placeholder="Extracción %" value="${s.receta.extraccion!=='—'?s.receta.extraccion:''}">
+    </div>
+    <div class="form-label">Perfil sensorial</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1rem">
+      ${scaleRow('acidez','Acidez')}${scaleRow('dulzor','Dulzor')}${scaleRow('posgusto','Posgusto')}${scaleRow('cuerpo','Cuerpo')}
+    </div>
+    <div class="form-label">Curva de balance</div>
+    <div class="curva-selector" id="edit-curva-group" style="margin-bottom:1rem">
+      <button class="curva-btn${editForm.curva==='plana'?' selected':''}" id="edit-curva-plana" onclick="setEditCurva('plana')">Plana</button>
+      <button class="curva-btn${editForm.curva==='parabola'?' selected':''}" id="edit-curva-parabola" onclick="setEditCurva('parabola')">Parábola</button>
+      <button class="curva-btn${editForm.curva==='invertida'?' selected':''}" id="edit-curva-invertida" onclick="setEditCurva('invertida')">Invertida</button>
+    </div>
+    <div class="form-label">Textura en lengua</div>
+    <div id="edit-textura-group" class="textura-grid" style="margin-bottom:1rem">
+      ${TEXTURAS_POS.map(t=>`<button class="textura-chip positive${editForm.textura===t?' selected':''}" onclick="setEditTextura('${t}')">${t}</button>`).join('')}
+      ${TEXTURAS_NEG.map(t=>`<button class="textura-chip negative${editForm.textura===t?' selected':''}" onclick="setEditTextura('${t}')">${t}</button>`).join('')}
+    </div>
+    <div class="form-label">Decisión</div>
+    <input class="input-field" id="edit-decision" type="text" style="width:100%;margin-bottom:0.75rem" value="${(s.decision||'').replace(/"/g,'&quot;')}">
+    <div class="form-label">Comentario libre</div>
+    <textarea class="input-field" id="edit-comentario" style="width:100%;resize:none;height:64px;margin-bottom:1rem">${s.comentario||''}</textarea>
+    <button class="btn-primary" style="width:100%" onclick="saveEditedShot()">Guardar cambios</button>
+    <button class="btn-secondary" style="margin-top:0.6rem" onclick="openShotModal('${id}')">Cancelar</button>
+  `;
+}
+function setEditScale(dim, val) {
+  editForm[dim] = val;
+  document.querySelectorAll(`#edit-scale-${dim} .scale-btn`).forEach((b,i)=>b.classList.toggle('selected', i+1===val));
+}
+function setEditCurva(val) {
+  editForm.curva = editForm.curva===val ? null : val;
+  ['plana','parabola','invertida'].forEach(k=>{ document.getElementById('edit-curva-'+k).classList.toggle('selected', k===editForm.curva); });
+}
+function setEditTextura(val) {
+  editForm.textura = editForm.textura===val ? null : val;
+  document.querySelectorAll('#edit-textura-group .textura-chip').forEach(b=>{
+    b.classList.toggle('selected', b.textContent===editForm.textura);
+  });
+}
+async function saveEditedShot() {
+  const s = state.shots.find(x=>x.id===editForm.shotId);
+  if (!s) return;
+  const snapshot = {
+    editedAt: new Date().toISOString(),
+    sensorial: {...s.sensorial},
+    receta: {...s.receta},
+    decision: s.decision,
+    comentario: s.comentario,
+    favorito: s.favorito
+  };
+  const newSensorial = {
+    acidez: editForm.acidez, dulzor: editForm.dulzor, posgusto: editForm.posgusto, cuerpo: editForm.cuerpo,
+    textura: editForm.textura, curva: editForm.curva
+  };
+  const newReceta = {
+    dosis: document.getElementById('edit-dosis').value || '—',
+    molienda: document.getElementById('edit-molienda').value || '—',
+    rendimiento: document.getElementById('edit-rendimiento').value || '—',
+    tiempo: document.getElementById('edit-tiempo').value || '—',
+    tds: document.getElementById('edit-tds').value || '—',
+    extraccion: document.getElementById('edit-extraccion').value || '—'
+  };
+  const newDecision = document.getElementById('edit-decision').value || 'Sin decisión registrada';
+  const newComentario = document.getElementById('edit-comentario').value || '';
+  const newDiagnostico = (newSensorial.textura && newSensorial.curva) ? DIAG[newSensorial.textura+'|'+newSensorial.curva] : null;
+
+  s.sensorial = newSensorial; s.receta = newReceta; s.decision = newDecision; s.comentario = newComentario;
+  s.diagnostico = newDiagnostico; s.editHistory = [...(s.editHistory||[]), snapshot];
+
+  const {error} = await sb.from('shots').update({
+    sensorial: s.sensorial, receta: s.receta, decision: s.decision, comentario: s.comentario,
+    diagnostico: s.diagnostico, edit_history: s.editHistory
+  }).eq('id', s.id);
+  if (error) console.error('Error guardando edición del shot:', error);
+
+  const id = editForm.shotId;
+  editForm = null;
+  openShotModal(id);
+  refreshUI();
+}
+
 // ══ COMPARATIVA ══
 function renderComparativa() {
   const today = state.shots.filter(s=>s.fecha===TODAY);
   ['sofi','cami'].forEach(key=>{
-    const name = key==='sofi'?'Sofi':'Cami';
+    const name = key==='sofi'?'Sofi':'Lauti';
     const shots = today.filter(s=>s.baristaKey===key);
     const statsEl = document.getElementById('stats-'+key);
     statsEl.innerHTML = `<div class="compare-metric-val">${shots.length}</div><div class="compare-metric-label">shots hoy</div>`;
