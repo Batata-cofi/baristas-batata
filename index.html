@@ -17,6 +17,7 @@
   --accent: #C8521A;
   --accent2: #E87340;
   --gold: #B8962E;
+  --blue: #2E5C7A;
   --green: #3A6B3E;
   --green-bg: #EBF3EC;
   --warn: #8B6914;
@@ -443,6 +444,7 @@ body { background: var(--bg); color: var(--ink); font-family: 'Instrument Sans',
 }
 .hist-barista.sofi { background: rgba(200,82,26,0.12); color: var(--accent); }
 .hist-barista.cami { background: rgba(184,150,46,0.15); color: var(--gold); }
+.hist-barista.andy { background: rgba(46,92,122,0.12); color: var(--blue); }
 .hist-barista.custom { background: rgba(58,107,62,0.12); color: var(--green); }
 .hist-time {
   font-family: 'DM Mono', monospace;
@@ -520,6 +522,7 @@ body { background: var(--bg); color: var(--ink); font-family: 'Instrument Sans',
 }
 .compare-who.sofi { color: var(--accent); }
 .compare-who.cami { color: var(--gold); }
+.compare-who.andy { color: var(--blue); }
 .compare-metric {
   margin-bottom: 0.6rem;
 }
@@ -894,6 +897,9 @@ body { background: var(--bg); color: var(--ink); font-family: 'Instrument Sans',
       </button>
       <button class="barista-btn" onclick="selectBaristaPre('Lauti','cami','Turno tarde')">
         <span>Lauti</span><span class="shift">Tarde</span>
+      </button>
+      <button class="barista-btn" onclick="selectBaristaPre('Andy','andy','Turno tarde')">
+        <span>Andy</span><span class="shift">Tarde</span>
       </button>
       <button class="barista-btn-custom" onclick="promptCustomBaristaPre()">+ otra persona</button>
     </div>
@@ -1327,6 +1333,7 @@ body { background: var(--bg); color: var(--ink); font-family: 'Instrument Sans',
       <button class="hist-filter-btn" onclick="filterHist('favoritos',this)">⭐ Favoritos</button>
       <button class="hist-filter-btn" onclick="filterHist('Sofi',this)">Sofi</button>
       <button class="hist-filter-btn" onclick="filterHist('Lauti',this)">Lauti</button>
+      <button class="hist-filter-btn" onclick="filterHist('Andy',this)">Andy</button>
       <button class="hist-filter-btn" onclick="filterHist('☀️',this)">☀️</button>
       <button class="hist-filter-btn" onclick="filterHist('⛅',this)">⛅</button>
       <button class="hist-filter-btn" onclick="filterHist('🌧️',this)">🌧️</button>
@@ -1362,6 +1369,16 @@ body { background: var(--bg); color: var(--ink); font-family: 'Instrument Sans',
               <div class="mini-bar-label"><span class="mini-bar post" style="display:inline-block;width:8px;height:8px;border-radius:2px"></span> Post</div>
             </div>
             <div id="stats-cami" class="compare-metric"><div class="compare-metric-val">—</div><div class="compare-metric-label">shots hoy</div></div>
+          </div>
+          <div class="compare-card">
+            <div class="compare-who andy">Andy · Tarde</div>
+            <div class="mini-curva" id="curva-andy"></div>
+            <div style="display:flex;justify-content:center;gap:8px;margin-bottom:0.75rem">
+              <div class="mini-bar-label"><span class="mini-bar acid" style="display:inline-block;width:8px;height:8px;border-radius:2px"></span> Acid</div>
+              <div class="mini-bar-label"><span class="mini-bar sweet" style="display:inline-block;width:8px;height:8px;border-radius:2px"></span> Dulz</div>
+              <div class="mini-bar-label"><span class="mini-bar post" style="display:inline-block;width:8px;height:8px;border-radius:2px"></span> Post</div>
+            </div>
+            <div id="stats-andy" class="compare-metric"><div class="compare-metric-val">—</div><div class="compare-metric-label">shots hoy</div></div>
           </div>
         </div>
       </div>
@@ -2305,8 +2322,8 @@ async function saveEditedShot() {
 // ══ COMPARATIVA ══
 function renderComparativa() {
   const today = state.shots.filter(s=>s.fecha===TODAY);
-  ['sofi','cami'].forEach(key=>{
-    const name = key==='sofi'?'Sofi':'Lauti';
+  ['sofi','cami','andy'].forEach(key=>{
+    const name = {sofi:'Sofi',cami:'Lauti',andy:'Andy'}[key];
     const shots = today.filter(s=>s.baristaKey===key);
     const statsEl = document.getElementById('stats-'+key);
     statsEl.innerHTML = `<div class="compare-metric-val">${shots.length}</div><div class="compare-metric-label">shots hoy</div>`;
