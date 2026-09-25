@@ -2164,6 +2164,7 @@ function openShotModal(id) {
     </div>` : ''}
     ${hasHistory?`<button class="btn-secondary" style="margin-top:1rem" onclick="openVersionHistory('${s.id}')">Ver versiones anteriores (${s.editHistory.length})</button>`:''}
     <button class="btn-secondary" style="margin-top:0.6rem" onclick="openEditShotForm('${s.id}')">✎ Editar receta</button>
+    <button class="btn-secondary" style="margin-top:0.6rem;color:var(--danger);border-color:rgba(139,32,32,0.3)" onclick="deleteShot('${s.id}')">🗑 Eliminar receta</button>
     <button class="btn-secondary" style="margin-top:0.6rem" onclick="closeShotModal()">Cerrar</button>
   `;
   document.getElementById('modal-shot').classList.add('open');
@@ -2178,6 +2179,17 @@ async function toggleFavoritoShot(id) {
   if (error) console.error('Error actualizando favorito:', error);
   openShotModal(id);
   refreshUI();
+}
+
+async function deleteShot(id) {
+  const s = state.shots.find(x=>x.id===id);
+  if (!s) return;
+  if (!confirm('¿Eliminar este shot (' + s.barista + ' · ' + s.fecha + ' ' + s.hora + ')? Esta acción no se puede deshacer.')) return;
+  state.shots = state.shots.filter(x=>x.id!==id);
+  closeShotModal();
+  refreshUI();
+  const {error} = await sb.from('shots').delete().eq('id', id);
+  if (error) console.error('Error eliminando shot:', error);
 }
 
 function openVersionHistory(id) {
