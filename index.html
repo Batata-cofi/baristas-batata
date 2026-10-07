@@ -1105,12 +1105,12 @@ body { background: var(--bg); color: var(--ink); font-family: 'Instrument Sans',
               <input class="input-field" type="number" step="0.1" id="inp-molienda" placeholder="ej. 1.5" oninput="updateSugerencias()">
             </div>
             <div class="input-group">
-              <span class="form-label">TDS %</span>
-              <input class="input-field" type="number" step="0.01" id="inp-tds" placeholder="ej. 9.97" oninput="updateSugerencias()">
-            </div>
-            <div class="input-group">
               <span class="form-label">Extracción %</span>
               <input class="input-field" type="number" step="0.01" id="inp-extraccion" placeholder="ej. 22.1" oninput="updateSugerencias()">
+            </div>
+            <div class="input-group">
+              <span class="form-label">TDS %</span>
+              <input class="input-field" type="number" step="0.01" id="inp-tds" placeholder="ej. 9.97" oninput="updateSugerencias()">
             </div>
           </div>
           <div class="input-row" style="align-items:flex-end">
@@ -1833,8 +1833,8 @@ function renderSugCard(elId, num, sug) {
       <div class="sug-proy-title">Proyección próximo shot</div>
       <div class="sug-proy-grid">
         ${proy.tiempo ? `<div class="sug-proy-item"><div class="sug-proy-val">${proy.tiempo}s</div><div class="sug-proy-label">Tiempo</div></div>` : ''}
-        ${proy.tds ? `<div class="sug-proy-item"><div class="sug-proy-val">${proy.tds.min}–${proy.tds.max}%</div><div class="sug-proy-label">TDS est.</div></div>` : ''}
         ${proy.ext ? `<div class="sug-proy-item"><div class="sug-proy-val">${proy.ext.min}–${proy.ext.max}%</div><div class="sug-proy-label">Ext. est.</div></div>` : ''}
+        ${proy.tds ? `<div class="sug-proy-item"><div class="sug-proy-val">${proy.tds.min}–${proy.tds.max}%</div><div class="sug-proy-label">TDS est.</div></div>` : ''}
       </div>
     </div>`;
   }
@@ -2192,8 +2192,8 @@ function openShotModal(id) {
       <div class="hist-val"><div class="hist-val-label">Molienda</div><div class="hist-val-num">${s.receta.molienda}</div></div>
       <div class="hist-val"><div class="hist-val-label">Rendimiento</div><div class="hist-val-num">${s.receta.rendimiento}g</div></div>
       <div class="hist-val"><div class="hist-val-label">Tiempo</div><div class="hist-val-num">${s.receta.tiempo}s</div></div>
-      <div class="hist-val"><div class="hist-val-label">TDS</div><div class="hist-val-num">${s.receta.tds}%</div></div>
       <div class="hist-val"><div class="hist-val-label">Extracción</div><div class="hist-val-num">${s.receta.extraccion}%</div></div>
+      <div class="hist-val"><div class="hist-val-label">TDS</div><div class="hist-val-num">${s.receta.tds}%</div></div>
       ${s.receta.flowRatio && s.receta.flowRatio!=='—' ? `<div class="hist-val"><div class="hist-val-label">Flow de ratio</div><div class="hist-val-num" style="color:${flowStatus(s.receta.flowRatio)==='ok'?'var(--green)':'var(--warn)'}">${s.receta.flowRatio}s</div></div>` : ''}
     </div>
     <div class="divider" style="margin-bottom:1rem"></div>
@@ -2345,8 +2345,8 @@ function openEditShotForm(id) {
       <input class="input-field" id="edit-molienda" type="number" placeholder="Molienda" value="${s.receta.molienda!=='—'?s.receta.molienda:''}">
       <input class="input-field" id="edit-rendimiento" type="number" placeholder="Rendimiento (g)" value="${s.receta.rendimiento!=='—'?s.receta.rendimiento:''}">
       <input class="input-field" id="edit-tiempo" type="number" placeholder="Tiempo (s)" value="${s.receta.tiempo!=='—'?s.receta.tiempo:''}">
-      <input class="input-field" id="edit-tds" type="number" placeholder="TDS %" value="${s.receta.tds!=='—'?s.receta.tds:''}">
       <input class="input-field" id="edit-extraccion" type="number" placeholder="Extracción %" value="${s.receta.extraccion!=='—'?s.receta.extraccion:''}">
+      <input class="input-field" id="edit-tds" type="number" placeholder="TDS %" value="${s.receta.tds!=='—'?s.receta.tds:''}">
       <input class="input-field" id="edit-flow" type="number" step="0.5" placeholder="Flow de ratio (s) · 12–16" value="${s.receta.flowRatio&&s.receta.flowRatio!=='—'?s.receta.flowRatio:''}">
     </div>
     <div class="form-label">Perfil sensorial</div>
@@ -3391,7 +3391,7 @@ async function exportExcel() {
       Fecha: s.fecha, Hora: s.hora, Barista: s.barista,
       Café: cafe.nombre || '', Proceso: cafe.proceso || '', 'Fecha tueste': cafe.tueste || '',
       'Dosis (g)': s.receta.dosis, 'Rendimiento (g)': s.receta.rendimiento, Ratio: ratio,
-      'Tiempo (s)': s.receta.tiempo, 'Flow de ratio (s)': s.receta.flowRatio && s.receta.flowRatio!=='—' ? s.receta.flowRatio : '', Molienda: s.receta.molienda, 'TDS %': s.receta.tds, 'Extracción %': s.receta.extraccion,
+      'Tiempo (s)': s.receta.tiempo, 'Flow de ratio (s)': s.receta.flowRatio && s.receta.flowRatio!=='—' ? s.receta.flowRatio : '', Molienda: s.receta.molienda, 'Extracción %': s.receta.extraccion, 'TDS %': s.receta.tds,
       Acidez: s.sensorial.acidez, Dulzor: s.sensorial.dulzor, Posgusto: s.sensorial.posgusto, Cuerpo: s.sensorial.cuerpo,
       Textura: s.sensorial.textura || '', Curva: s.sensorial.curva || '',
       Decisión: s.decision, Comentario: s.comentario, Favorito: s.favorito ? 'Sí' : 'No',
