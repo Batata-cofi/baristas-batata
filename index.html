@@ -774,18 +774,18 @@ body { background: var(--bg); color: var(--ink); font-family: 'Instrument Sans',
 }
 .clima-btn.selected span { color: rgba(245,240,232,0.85); }
 /* Modal clima uses card colors */
-#clima-iconos-modal .clima-btn {
+#clima-iconos-modal .clima-btn, #clima-iconos-shot .clima-btn {
   background: var(--bg);
   border-color: var(--border);
   color: var(--ink);
 }
-#clima-iconos-modal .clima-btn span { color: var(--ink3); }
-#clima-iconos-modal .clima-btn.selected {
+#clima-iconos-modal .clima-btn span, #clima-iconos-shot .clima-btn span { color: var(--ink3); }
+#clima-iconos-modal .clima-btn.selected, #clima-iconos-shot .clima-btn.selected {
   background: var(--ink);
   border-color: var(--ink);
   color: var(--bg);
 }
-#clima-iconos-modal .clima-btn.selected span { color: rgba(245,240,232,0.7); }
+#clima-iconos-modal .clima-btn.selected span, #clima-iconos-shot .clima-btn.selected span { color: rgba(245,240,232,0.7); }
 /* Star button active */
 #star-btn.active { opacity: 1 !important; }
 
@@ -2170,6 +2170,8 @@ function openShotModal(id) {
   const cafe = state.cafes.find(c=>c.id===s.cafeId);
   const d = s.diagnostico;
   const hasHistory = s.editHistory && s.editHistory.length;
+  const c = s.clima;
+  const climaTxt = c ? [[c.emoji, c.label].filter(Boolean).join(' '), c.temp ? c.temp+'°C' : '', c.hum ? c.hum+'% hum' : ''].filter(Boolean).join(' · ') : '';
   document.getElementById('modal-shot-content').innerHTML = `
     <div class="modal-handle"></div>
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
@@ -2180,7 +2182,11 @@ function openShotModal(id) {
         <span class="hist-barista ${s.baristaKey}" style="display:inline-block">${s.fecha}</span>
       </div>
     </div>
-    ${cafe?`<div style="font-size:0.8rem;color:var(--ink3);margin-bottom:1rem;font-family:'DM Mono',monospace">${cafe.nombre}</div>`:''}
+    ${cafe?`<div style="font-size:0.8rem;color:var(--ink3);margin-bottom:0.6rem;font-family:'DM Mono',monospace">${cafe.nombre}</div>`:''}
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:1rem">
+      <div style="font-size:0.8rem;color:${climaTxt?'var(--ink2)':'var(--ink3)'}">${climaTxt || 'Sin clima cargado'}</div>
+      <button onclick="openEditClimaShot('${s.id}')" style="background:none;border:none;font-family:'DM Mono',monospace;font-size:0.62rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--accent);cursor:pointer;padding:2px 0">${climaTxt?'✎ editar clima':'+ cargar clima'}</button>
+    </div>
     <div class="hist-receta" style="flex-wrap:wrap;gap:16px;margin-bottom:1rem">
       <div class="hist-val"><div class="hist-val-label">Dosis</div><div class="hist-val-num">${s.receta.dosis}g</div></div>
       <div class="hist-val"><div class="hist-val-label">Molienda</div><div class="hist-val-num">${s.receta.molienda}</div></div>
@@ -2221,6 +2227,54 @@ async function toggleFavoritoShot(id) {
   if (error) console.error('Error actualizando favorito:', error);
   openShotModal(id);
   refreshUI();
+}
+
+let climaShotEdit = null;
+const CLIMAS = [['☀️','Soleado'],['⛅','Nublado'],['🌧️','Lluvia'],['🌫️','Húmedo'],['❄️','Frío'],['🔥','Calor']];
+function openEditClimaShot(id) {
+  const s = state.shots.find(x=>x.id===id);
+  if (!s) return;
+  const c = s.clima || {};
+  climaShotEdit = { id, emoji: c.emoji || null, label: c.label || null };
+  document.getElementById('modal-shot-content').innerHTML = `
+    <div class="modal-handle"></div>
+    <div class="modal-title" style="margin-bottom:1rem">Clima · ${s.barista} · ${s.hora}</div>
+    <div class="clima-iconos" id="clima-iconos-shot">
+      ${CLIMAS.map(([e,l])=>`<button class="clima-btn${c.emoji===e?' selected':''}" data-clima="${e}" data-label="${l}" onclick="setClimaShot(this)">${e}<span>${l}</span></button>`).join('')}
+    </div>
+    <div style="display:flex;gap:8px;margin-top:1rem">
+      <div style="flex:1">
+        <div class="form-label">Temp °C</div>
+        <input class="input-field" id="clima-temp-shot" type="number" placeholder="ej. 18" value="${c.temp||''}">
+      </div>
+      <div style="flex:1">
+        <div class="form-label">Humedad %</div>
+        <input class="input-field" id="clima-hum-shot" type="number" placeholder="ej. 65" value="${c.hum||''}">
+      </div>
+    </div>
+    <button class="btn-primary" style="margin-top:1rem;width:100%" onclick="saveClimaShot()">Guardar clima</button>
+    <button class="btn-secondary" style="margin-top:0.6rem" onclick="openShotModal('${id}')">Cancelar</button>
+  `;
+}
+function setClimaShot(btn) {
+  const same = climaShotEdit.emoji === btn.dataset.clima;
+  climaShotEdit.emoji = same ? null : btn.dataset.clima;
+  climaShotEdit.label = same ? null : btn.dataset.label;
+  document.querySelectorAll('#clima-iconos-shot .clima-btn').forEach(b => b.classList.toggle('selected', b.dataset.clima === climaShotEdit.emoji));
+}
+async function saveClimaShot() {
+  const s = state.shots.find(x=>x.id===climaShotEdit.id);
+  if (!s) return;
+  const temp = document.getElementById('clima-temp-shot').value || null;
+  const hum = document.getElementById('clima-hum-shot').value || null;
+  const {emoji, label} = climaShotEdit;
+  s.clima = (emoji || temp || hum) ? { emoji, label, temp, hum } : null;
+  const id = s.id;
+  climaShotEdit = null;
+  openShotModal(id);
+  refreshUI();
+  const {error} = await sb.from('shots').update({clima: s.clima}).eq('id', id);
+  if (error) console.error('Error guardando clima del shot:', error);
 }
 
 async function deleteShot(id) {
@@ -3341,7 +3395,7 @@ async function exportExcel() {
       Acidez: s.sensorial.acidez, Dulzor: s.sensorial.dulzor, Posgusto: s.sensorial.posgusto, Cuerpo: s.sensorial.cuerpo,
       Textura: s.sensorial.textura || '', Curva: s.sensorial.curva || '',
       Decisión: s.decision, Comentario: s.comentario, Favorito: s.favorito ? 'Sí' : 'No',
-      Clima: s.clima ? (s.clima.emoji + ' ' + (s.clima.label||'')).trim() : '',
+      Clima: s.clima ? ((s.clima.emoji||'') + ' ' + (s.clima.label||'')).trim() : '',
       'Temp clima °C': s.clima ? s.clima.temp : '', 'Humedad clima %': s.clima ? s.clima.hum : ''
     };
   });
