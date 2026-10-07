@@ -2357,7 +2357,8 @@ function openEditShotForm(id) {
     shotId: id,
     acidez: s.sensorial.acidez||0, dulzor: s.sensorial.dulzor||0,
     posgusto: s.sensorial.posgusto||0, cuerpo: s.sensorial.cuerpo||0,
-    textura: s.sensorial.textura||null, curva: s.sensorial.curva||null
+    textura: s.sensorial.textura||null, curva: s.sensorial.curva||null,
+    recetaDelDia: !!s.recetaDelDia
   };
   const scaleRow = (dim, label) => `
     <div style="flex:1;min-width:70px">
@@ -2398,9 +2399,27 @@ function openEditShotForm(id) {
     <input class="input-field" id="edit-decision" type="text" style="width:100%;margin-bottom:0.75rem" value="${(s.decision||'').replace(/"/g,'&quot;')}">
     <div class="form-label">Comentario libre</div>
     <textarea class="input-field" id="edit-comentario" style="width:100%;resize:none;height:64px;margin-bottom:1rem">${s.comentario||''}</textarea>
+    <button id="edit-dia-btn" onclick="toggleEditDia()" style="width:100%;margin-bottom:1rem;background:var(--bg);border:1px solid var(--border2);border-radius:var(--r-sm);padding:0.65rem 1rem;display:flex;align-items:center;justify-content:space-between;cursor:pointer;font-family:'Instrument Sans',sans-serif;font-size:0.85rem;color:var(--ink2)">
+      <span id="edit-dia-label"></span><span id="edit-dia-icon" style="font-size:1.3rem"></span>
+    </button>
     <button class="btn-primary" style="width:100%" onclick="saveEditedShot()">Guardar cambios</button>
     <button class="btn-secondary" style="margin-top:0.6rem" onclick="openShotModal('${id}')">Cancelar</button>
   `;
+  renderEditDia();
+}
+function renderEditDia() {
+  const on = editForm.recetaDelDia;
+  const btn = document.getElementById('edit-dia-btn');
+  document.getElementById('edit-dia-label').textContent = on ? 'Receta del día · tocá para quitar' : 'Elegir como receta del día';
+  const icon = document.getElementById('edit-dia-icon');
+  icon.textContent = on ? '✅' : '○';
+  icon.style.opacity = on ? 1 : 0.3;
+  btn.style.background = on ? 'color-mix(in srgb, var(--green) 10%, var(--card))' : 'var(--bg)';
+  btn.style.borderColor = on ? 'rgba(58,107,62,0.4)' : 'var(--border2)';
+}
+function toggleEditDia() {
+  editForm.recetaDelDia = !editForm.recetaDelDia;
+  renderEditDia();
 }
 function setEditScale(dim, val) {
   editForm[dim] = val;
@@ -2444,13 +2463,24 @@ async function saveEditedShot() {
   const newComentario = document.getElementById('edit-comentario').value || '';
   const newDiagnostico = (newSensorial.textura && newSensorial.curva) ? DIAG[newSensorial.textura+'|'+newSensorial.curva] : null;
 
-  s.sensorial = newSensorial; s.receta = newReceta; s.decision = newDecision; s.comentario = newComentario;
-  s.diagnostico = newDiagnostico; s.editHistory = [...(s.editHistory||[]), snapshot];
+  const norm = v => (v === undefined || v === null || v === '') ? '—' : String(v);
+  const recipeChanged =
+    ['acidez','dulzor','posgusto','cuerpo','textura','curva'].some(k => norm(s.sensorial[k]) !== norm(newSensorial[k])) ||
+    Object.keys(newReceta).some(k => norm(s.receta[k]) !== norm(newReceta[k])) ||
+    s.decision !== newDecision || (s.comentario||'') !== newComentario;
 
-  const {error} = await sb.from('shots').update({
-    sensorial: s.sensorial, receta: s.receta, decision: s.decision, comentario: s.comentario,
-    diagnostico: s.diagnostico, edit_history: s.editHistory
-  }).eq('id', s.id);
+  s.recetaDelDia = editForm.recetaDelDia;
+  const payload = { receta_del_dia: s.recetaDelDia };
+  if (recipeChanged) {
+    s.sensorial = newSensorial; s.receta = newReceta; s.decision = newDecision; s.comentario = newComentario;
+    s.diagnostico = newDiagnostico; s.editHistory = [...(s.editHistory||[]), snapshot];
+    Object.assign(payload, {
+      sensorial: s.sensorial, receta: s.receta, decision: s.decision, comentario: s.comentario,
+      diagnostico: s.diagnostico, edit_history: s.editHistory
+    });
+  }
+
+  const {error} = await sb.from('shots').update(payload).eq('id', s.id);
   if (error) console.error('Error guardando edición del shot:', error);
 
   const id = editForm.shotId;
