@@ -25,6 +25,7 @@ create table if not exists shots (
   favorito boolean not null default false,
   clima jsonb,
   edit_history jsonb not null default '[]'::jsonb,
+  receta_del_dia boolean not null default false,
   created_at timestamptz not null default now()
 );
 

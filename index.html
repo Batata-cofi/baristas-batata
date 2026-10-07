@@ -506,6 +506,7 @@ body { background: var(--bg); color: var(--ink); font-family: 'Instrument Sans',
 .hist-pill.warn { background: var(--warn-bg); color: var(--warn); }
 .hist-pill.bad { background: var(--danger-bg); color: var(--danger); }
 .hist-pill.edited { background: var(--bg3); color: var(--ink2); }
+.hist-pill.dia { background: var(--green); color: var(--bg); }
 .hist-textura {
   font-size: 0.72rem;
   color: var(--ink2);
@@ -1209,6 +1210,12 @@ body { background: var(--bg); color: var(--ink); font-family: 'Instrument Sans',
       <span id="star-icon" style="font-size:1.4rem;transition:all 0.2s;opacity:0.3">☆</span>
     </button>
 
+    <!-- Receta del día -->
+    <button id="dia-btn" onclick="toggleRecetaDelDiaForm()" style="width:100%;background:var(--card);border:1px solid var(--border2);border-radius:var(--r-sm);padding:0.75rem 1rem;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:all 0.2s;font-family:'Instrument Sans',sans-serif;font-size:0.85rem;color:var(--ink2)">
+      <span id="dia-label">Elegir como receta del día</span>
+      <span id="dia-icon" style="font-size:1.4rem;transition:all 0.2s;opacity:0.3">○</span>
+    </button>
+
     <button class="btn-primary" onclick="guardarShot()">Registrar shot</button>
     <div style="height:1rem"></div>
   </div>
@@ -1354,6 +1361,7 @@ body { background: var(--bg); color: var(--ink); font-family: 'Instrument Sans',
     <div class="hist-filters" id="hist-filters">
       <button class="hist-filter-btn active" onclick="filterHist('all',this)">Todos</button>
       <button class="hist-filter-btn" onclick="filterHist('favoritos',this)">⭐ Favoritos</button>
+      <button class="hist-filter-btn" onclick="filterHist('dia',this)">✓ Del día</button>
       <button class="hist-filter-btn" onclick="filterHist('Sofi',this)">Sofi</button>
       <button class="hist-filter-btn" onclick="filterHist('Lauti',this)">Lauti</button>
       <button class="hist-filter-btn" onclick="filterHist('Andy',this)">Andy</button>
@@ -1539,7 +1547,8 @@ async function loadAll() {
     id: r.id, barista: r.barista, baristaKey: r.barista_key, cafeId: r.cafe_id,
     fecha: r.fecha, hora: r.hora, sensorial: r.sensorial, receta: r.receta,
     decision: r.decision, comentario: r.comentario, diagnostico: r.diagnostico,
-    cafe: r.cafe, favorito: r.favorito, clima: r.clima, editHistory: r.edit_history || []
+    cafe: r.cafe, favorito: r.favorito, clima: r.clima, editHistory: r.edit_history || [],
+    recetaDelDia: !!r.receta_del_dia
   }));
   state.catas = {};
   (catasRes.data || []).forEach(c => {
@@ -2065,14 +2074,16 @@ async function guardarShot() {
     cafe: state.cafes.find(c=>c.id===state.cafeActivo),
     favorito: state.form.favorito || false,
     clima: state.turnoClima ? {...state.turnoClima} : null,
-    editHistory: []
+    editHistory: [],
+    recetaDelDia: formRecetaDelDia
   };
   state.shots.push(shot); updateShotCounter();
   const row = {
     id: shot.id, barista: shot.barista, barista_key: shot.baristaKey, cafe_id: shot.cafeId,
     fecha: shot.fecha, hora: shot.hora, sensorial: shot.sensorial, receta: shot.receta,
     decision: shot.decision, comentario: shot.comentario, diagnostico: shot.diagnostico,
-    cafe: shot.cafe, favorito: shot.favorito, clima: shot.clima
+    cafe: shot.cafe, favorito: shot.favorito, clima: shot.clima,
+    ...(shot.recetaDelDia ? { receta_del_dia: true } : {})
   };
   const {error} = await sb.from('shots').insert(row);
   if (error) console.error('Error guardando shot:', error);
@@ -2098,6 +2109,8 @@ function resetForm() {
   if(si){si.textContent='☆';si.style.opacity='0.3';}
   if(sl){sl.textContent='Marcar como receta favorita';}
   if(sb){sb.style.background='';sb.style.borderColor='';}
+  formRecetaDelDia = false;
+  renderRecetaDelDiaForm();
 }
 
 // ══ HISTORIAL ══
@@ -2112,6 +2125,7 @@ function renderHist() {
   const list = document.getElementById('hist-list');
   let shots = [...state.shots].reverse();
   if (histFilter === 'favoritos') shots = shots.filter(s=>s.favorito);
+  else if (histFilter === 'dia') shots = shots.filter(s=>s.recetaDelDia);
   else if (histFilter === 'all') { /* all */ }
   else if (['☀️','⛅','🌧️','🌫️','❄️','🔥'].includes(histFilter)) shots = shots.filter(s=>s.clima&&s.clima.emoji&&s.clima.emoji.trim()===histFilter.trim());
   else shots = shots.filter(s=>s.barista===histFilter);
@@ -2152,6 +2166,7 @@ function shotCard(s) {
       </div>
     </div>
     <div class="hist-sensorial">
+      ${s.recetaDelDia?'<span class="hist-pill dia">✓ receta del día</span>':''}
       ${s.sensorial.acidez?`<span class="hist-pill warn">Ac ${s.sensorial.acidez}</span>`:''}
       ${s.sensorial.dulzor?`<span class="hist-pill ok">Dulz ${s.sensorial.dulzor}</span>`:''}
       ${s.sensorial.posgusto?`<span class="hist-pill ok">Post ${s.sensorial.posgusto}</span>`:''}
@@ -2187,6 +2202,10 @@ function openShotModal(id) {
       <div style="font-size:0.8rem;color:${climaTxt?'var(--ink2)':'var(--ink3)'}">${climaTxt || 'Sin clima cargado'}</div>
       <button onclick="openEditClimaShot('${s.id}')" style="background:none;border:none;font-family:'DM Mono',monospace;font-size:0.62rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--accent);cursor:pointer;padding:2px 0">${climaTxt?'✎ editar clima':'+ cargar clima'}</button>
     </div>
+    <button onclick="toggleRecetaDelDia('${s.id}')" style="width:100%;margin-bottom:1rem;background:${s.recetaDelDia?'color-mix(in srgb, var(--green) 10%, var(--card))':'var(--bg)'};border:1px solid ${s.recetaDelDia?'rgba(58,107,62,0.4)':'var(--border2)'};border-radius:var(--r-sm);padding:0.65rem 1rem;display:flex;align-items:center;justify-content:space-between;cursor:pointer;font-family:'Instrument Sans',sans-serif;font-size:0.85rem;color:var(--ink2)">
+      <span>${s.recetaDelDia?'Receta del día · tocá para quitar':'Elegir como receta del día'}</span>
+      <span style="font-size:1.3rem;opacity:${s.recetaDelDia?1:0.3}">${s.recetaDelDia?'✅':'○'}</span>
+    </button>
     <div class="hist-receta" style="flex-wrap:wrap;gap:16px;margin-bottom:1rem">
       <div class="hist-val"><div class="hist-val-label">Dosis</div><div class="hist-val-num">${s.receta.dosis}g</div></div>
       <div class="hist-val"><div class="hist-val-label">Molienda</div><div class="hist-val-num">${s.receta.molienda}</div></div>
@@ -2227,6 +2246,16 @@ async function toggleFavoritoShot(id) {
   if (error) console.error('Error actualizando favorito:', error);
   openShotModal(id);
   refreshUI();
+}
+
+async function toggleRecetaDelDia(id) {
+  const s = state.shots.find(x=>x.id===id);
+  if (!s) return;
+  s.recetaDelDia = !s.recetaDelDia;
+  openShotModal(id);
+  refreshUI();
+  const {error} = await sb.from('shots').update({receta_del_dia: s.recetaDelDia}).eq('id', id);
+  if (error) console.error('Error actualizando receta del día:', error);
 }
 
 let climaShotEdit = null;
@@ -3183,6 +3212,28 @@ function toggleStar() {
   }
 }
 
+// ══ RECETA DEL DÍA (elegida para el servicio; independiente del favorito) ══
+let formRecetaDelDia = false;
+function renderRecetaDelDiaForm() {
+  const icon = document.getElementById('dia-icon');
+  const label = document.getElementById('dia-label');
+  const btn = document.getElementById('dia-btn');
+  if (formRecetaDelDia) {
+    icon.textContent = '✅'; icon.style.opacity = '1';
+    label.textContent = 'Elegida como receta del día';
+    btn.style.background = 'color-mix(in srgb, var(--green) 10%, var(--card))';
+    btn.style.borderColor = 'rgba(58,107,62,0.4)';
+  } else {
+    icon.textContent = '○'; icon.style.opacity = '0.3';
+    label.textContent = 'Elegir como receta del día';
+    btn.style.background = ''; btn.style.borderColor = '';
+  }
+}
+function toggleRecetaDelDiaForm() {
+  formRecetaDelDia = !formRecetaDelDia;
+  renderRecetaDelDiaForm();
+}
+
 // ══ CATA SEMANAL ══
 let cataForm = { acidez:0, dulzor:0, posgusto:0, cuerpo:0, textura:'', notas:'' };
 
@@ -3394,7 +3445,7 @@ async function exportExcel() {
       'Tiempo (s)': s.receta.tiempo, 'Flow de ratio (s)': s.receta.flowRatio && s.receta.flowRatio!=='—' ? s.receta.flowRatio : '', Molienda: s.receta.molienda, 'Extracción %': s.receta.extraccion, 'TDS %': s.receta.tds,
       Acidez: s.sensorial.acidez, Dulzor: s.sensorial.dulzor, Posgusto: s.sensorial.posgusto, Cuerpo: s.sensorial.cuerpo,
       Textura: s.sensorial.textura || '', Curva: s.sensorial.curva || '',
-      Decisión: s.decision, Comentario: s.comentario, Favorito: s.favorito ? 'Sí' : 'No',
+      Decisión: s.decision, Comentario: s.comentario, Favorito: s.favorito ? 'Sí' : 'No', 'Receta del día': s.recetaDelDia ? 'Sí' : 'No',
       Clima: s.clima ? ((s.clima.emoji||'') + ' ' + (s.clima.label||'')).trim() : '',
       'Temp clima °C': s.clima ? s.clima.temp : '', 'Humedad clima %': s.clima ? s.clima.hum : ''
     };
