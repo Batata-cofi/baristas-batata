@@ -317,6 +317,22 @@ body { background: var(--bg); color: var(--ink); font-family: 'Instrument Sans',
   outline: none;
   transition: border-color 0.15s;
 }
+.flow-indicador {
+  flex: 1;
+  min-height: 2.5rem;
+  display: flex;
+  align-items: center;
+  padding: 0 0.85rem;
+  border-radius: var(--r-sm);
+  background: var(--bg2);
+  border-left: 3px solid var(--border);
+  font-family: 'DM Mono', monospace;
+  font-size: 0.62rem;
+  line-height: 1.35;
+  color: var(--ink3);
+}
+.flow-indicador.ok { background: var(--green-bg); border-left-color: var(--green); color: var(--green); }
+.flow-indicador.warn { background: var(--warn-bg); border-left-color: var(--warn); color: var(--warn); }
 .input-field:focus { border-color: var(--accent); }
 .input-field::placeholder { color: var(--ink3); }
 
@@ -1097,6 +1113,13 @@ body { background: var(--bg); color: var(--ink); font-family: 'Instrument Sans',
               <input class="input-field" type="number" step="0.01" id="inp-extraccion" placeholder="ej. 22.1" oninput="updateSugerencias()">
             </div>
           </div>
+          <div class="input-row" style="align-items:flex-end">
+            <div class="input-group" style="flex:0 0 calc(33.333% - 5.34px)">
+              <span class="form-label">Flow de ratio (s)</span>
+              <input class="input-field" type="number" step="0.5" id="inp-flow" placeholder="ej. 13" oninput="updateFlowIndicador()">
+            </div>
+            <div id="flow-indicador" class="flow-indicador"></div>
+          </div>
           <!-- Fila opcional: temp / presion / reposo -->
           <div style="display:flex;align-items:center;gap:6px;margin-top:2px">
             <button type="button" id="toggle-extra-fields" onclick="toggleExtraFields()" style="background:none;border:none;font-family:'DM Mono',monospace;font-size:0.58rem;color:var(--ink3);letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;padding:2px 0;display:flex;align-items:center;gap:4px">
@@ -1729,6 +1752,22 @@ function updateRatioDisplay() {
   }
 }
 
+// Flow de ratio: segundo en que los gramos en taza igualan a los segundos de extracción.
+const FLOW_MIN = 12, FLOW_MAX = 16;
+function flowStatus(v) {
+  const n = parseFloat(v);
+  if (isNaN(n)) return null;
+  return (n >= FLOW_MIN && n <= FLOW_MAX) ? 'ok' : 'warn';
+}
+function updateFlowIndicador() {
+  const el = document.getElementById('flow-indicador');
+  const v = document.getElementById('inp-flow').value;
+  const st = flowStatus(v);
+  el.className = 'flow-indicador' + (st ? ' ' + st : '');
+  if (!st) { el.textContent = 'Segundo en que los g en taza igualan a los s · aceptable ' + FLOW_MIN + '–' + FLOW_MAX + ' s'; return; }
+  el.textContent = st === 'ok' ? '✓ En rango (' + FLOW_MIN + '–' + FLOW_MAX + ' s)' : '⚠ Fuera de rango · aceptable ' + FLOW_MIN + '–' + FLOW_MAX + ' s';
+}
+
 function getRecetaActual() {
   const dosis = getDosis();
   return {
@@ -2018,6 +2057,7 @@ async function guardarShot() {
       tiempo: document.getElementById('inp-tiempo').value||'—',
       tds: document.getElementById('inp-tds').value||'—',
       extraccion: document.getElementById('inp-extraccion').value||'—',
+      flowRatio: document.getElementById('inp-flow').value||'—',
     },
     decision: document.getElementById('inp-decision').value||'Sin decisión registrada',
     comentario: document.getElementById('inp-comentario').value||'',
@@ -2046,8 +2086,9 @@ function resetForm() {
   document.querySelectorAll('.scale-btn').forEach(b=>b.classList.remove('selected'));
   document.querySelectorAll('.textura-chip').forEach(c=>c.classList.remove('selected'));
   document.querySelectorAll('.curva-btn').forEach(b=>b.classList.remove('selected'));
-  ['inp-molienda','inp-rendimiento','inp-tiempo','inp-tds','inp-extraccion','inp-decision','inp-comentario','inp-temp','inp-presion','inp-reposo'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  ['inp-molienda','inp-rendimiento','inp-tiempo','inp-tds','inp-extraccion','inp-flow','inp-decision','inp-comentario','inp-temp','inp-presion','inp-reposo'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
   updateRatioDisplay();
+  updateFlowIndicador();
   document.getElementById('diagnostico-box').className='diagnostico-box';
   document.getElementById('sugerencias-wrap').style.display='none';
   state.form.favorito = false;
@@ -2147,6 +2188,7 @@ function openShotModal(id) {
       <div class="hist-val"><div class="hist-val-label">Tiempo</div><div class="hist-val-num">${s.receta.tiempo}s</div></div>
       <div class="hist-val"><div class="hist-val-label">TDS</div><div class="hist-val-num">${s.receta.tds}%</div></div>
       <div class="hist-val"><div class="hist-val-label">Extracción</div><div class="hist-val-num">${s.receta.extraccion}%</div></div>
+      ${s.receta.flowRatio && s.receta.flowRatio!=='—' ? `<div class="hist-val"><div class="hist-val-label">Flow de ratio</div><div class="hist-val-num" style="color:${flowStatus(s.receta.flowRatio)==='ok'?'var(--green)':'var(--warn)'}">${s.receta.flowRatio}s</div></div>` : ''}
     </div>
     <div class="divider" style="margin-bottom:1rem"></div>
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1rem;text-align:center">
@@ -2211,7 +2253,7 @@ function versionCard(v, isOriginal) {
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:8px;text-align:center">
       ${['acidez','dulzor','posgusto','cuerpo'].map(k=>`<div><div style="font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--ink3);text-transform:uppercase">${k}</div><div style="font-size:1.1rem;font-family:'DM Serif Display',serif">${(v.sensorial&&v.sensorial[k])||'—'}</div></div>`).join('')}
     </div>
-    <div style="font-size:0.78rem;color:var(--ink2)">Dosis ${v.receta.dosis}g · Mol ${v.receta.molienda} · Rend ${v.receta.rendimiento}g · ${v.receta.tiempo}s</div>
+    <div style="font-size:0.78rem;color:var(--ink2)">Dosis ${v.receta.dosis}g · Mol ${v.receta.molienda} · Rend ${v.receta.rendimiento}g · ${v.receta.tiempo}s${v.receta.flowRatio&&v.receta.flowRatio!=='—'?' · Flow '+v.receta.flowRatio+'s':''}</div>
     ${v.sensorial&&v.sensorial.textura?`<div style="font-size:0.78rem;color:var(--ink2);margin-top:4px">${v.sensorial.textura}${v.sensorial.curva?' · '+v.sensorial.curva:''}</div>`:''}
     <div style="font-size:0.78rem;color:var(--ink2);margin-top:6px">↳ ${v.decision}</div>
     ${v.comentario?`<div style="font-size:0.75rem;color:var(--ink3);font-style:italic;margin-top:4px">"${v.comentario}"</div>`:''}
@@ -2251,6 +2293,7 @@ function openEditShotForm(id) {
       <input class="input-field" id="edit-tiempo" type="number" placeholder="Tiempo (s)" value="${s.receta.tiempo!=='—'?s.receta.tiempo:''}">
       <input class="input-field" id="edit-tds" type="number" placeholder="TDS %" value="${s.receta.tds!=='—'?s.receta.tds:''}">
       <input class="input-field" id="edit-extraccion" type="number" placeholder="Extracción %" value="${s.receta.extraccion!=='—'?s.receta.extraccion:''}">
+      <input class="input-field" id="edit-flow" type="number" step="0.5" placeholder="Flow de ratio (s) · 12–16" value="${s.receta.flowRatio&&s.receta.flowRatio!=='—'?s.receta.flowRatio:''}">
     </div>
     <div class="form-label">Perfil sensorial</div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1rem">
@@ -2310,7 +2353,8 @@ async function saveEditedShot() {
     rendimiento: document.getElementById('edit-rendimiento').value || '—',
     tiempo: document.getElementById('edit-tiempo').value || '—',
     tds: document.getElementById('edit-tds').value || '—',
-    extraccion: document.getElementById('edit-extraccion').value || '—'
+    extraccion: document.getElementById('edit-extraccion').value || '—',
+    flowRatio: document.getElementById('edit-flow').value || '—'
   };
   const newDecision = document.getElementById('edit-decision').value || 'Sin decisión registrada';
   const newComentario = document.getElementById('edit-comentario').value || '';
@@ -3293,7 +3337,7 @@ async function exportExcel() {
       Fecha: s.fecha, Hora: s.hora, Barista: s.barista,
       Café: cafe.nombre || '', Proceso: cafe.proceso || '', 'Fecha tueste': cafe.tueste || '',
       'Dosis (g)': s.receta.dosis, 'Rendimiento (g)': s.receta.rendimiento, Ratio: ratio,
-      'Tiempo (s)': s.receta.tiempo, Molienda: s.receta.molienda, 'TDS %': s.receta.tds, 'Extracción %': s.receta.extraccion,
+      'Tiempo (s)': s.receta.tiempo, 'Flow de ratio (s)': s.receta.flowRatio && s.receta.flowRatio!=='—' ? s.receta.flowRatio : '', Molienda: s.receta.molienda, 'TDS %': s.receta.tds, 'Extracción %': s.receta.extraccion,
       Acidez: s.sensorial.acidez, Dulzor: s.sensorial.dulzor, Posgusto: s.sensorial.posgusto, Cuerpo: s.sensorial.cuerpo,
       Textura: s.sensorial.textura || '', Curva: s.sensorial.curva || '',
       Decisión: s.decision, Comentario: s.comentario, Favorito: s.favorito ? 'Sí' : 'No',
@@ -3318,6 +3362,8 @@ async function exportExcel() {
   const fname = 'batata-cofi-datos-' + TODAY.replace(/\//g,'-') + '.xlsx';
   XLSX.writeFile(wb, fname);
 }
+
+updateFlowIndicador();
 </script>
 
 <!-- ══ MODAL: CLIMA ══ -->
