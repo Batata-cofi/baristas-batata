@@ -285,24 +285,30 @@ body { background: var(--bg); color: var(--ink); font-family: 'Instrument Sans',
 }
 .scale-btn.selected { background: var(--ink); color: var(--bg); border-color: var(--ink); }
 
-.textura-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-.textura-chip {
-  border: 1px solid var(--border);
-  border-radius: var(--r-sm);
-  padding: 0.5rem 0.25rem;
-  text-align: center;
-  font-size: 0.72rem;
-  color: var(--ink2);
-  cursor: pointer;
-  background: var(--bg);
-  transition: all 0.15s;
-  font-family: 'Instrument Sans', sans-serif;
+/* Textura: segmento de muy malo a muy bueno */
+.tex-seg-ends {
+  display: flex; justify-content: space-between;
+  font-family: 'DM Mono', monospace; font-size: 0.55rem; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--ink3); margin-bottom: 6px;
 }
-.textura-chip.selected { background: var(--ink); color: var(--bg); border-color: var(--ink); }
-.textura-chip.positive { border-color: rgba(58,107,62,0.3); }
-.textura-chip.positive.selected { background: var(--green); border-color: var(--green); }
-.textura-chip.negative { border-color: rgba(200,82,26,0.2); }
-.textura-chip.negative.selected { background: var(--accent); border-color: var(--accent); }
+.tex-seg-row { display: flex; gap: 2px; }
+.tex-seg-btn {
+  flex: 1; min-width: 0; background: none; border: none; padding: 0; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+}
+.tex-seg-bar {
+  width: 100%; height: 34px; background: var(--c); opacity: 0.45;
+  border-radius: 4px; border: 2px solid transparent; transition: all 0.15s;
+}
+.tex-seg-btn:first-child .tex-seg-bar { border-radius: 10px 4px 4px 10px; }
+.tex-seg-btn:last-child .tex-seg-bar { border-radius: 4px 10px 10px 4px; }
+.tex-seg-btn.selected .tex-seg-bar { opacity: 1; border-color: var(--ink); }
+.tex-seg-name {
+  writing-mode: vertical-rl; transform: rotate(180deg);
+  font-family: 'Instrument Sans', sans-serif; font-size: 0.68rem; line-height: 1;
+  color: var(--ink3); white-space: nowrap; padding: 2px 0;
+}
+.tex-seg-btn.selected .tex-seg-name { color: var(--ink); font-weight: 600; }
 
 .input-row { display: flex; gap: 8px; }
 .input-group { flex: 1; }
@@ -1063,17 +1069,7 @@ body { background: var(--bg); color: var(--ink); font-family: 'Instrument Sans',
 
           <div>
             <span class="form-label">Textura en lengua</span>
-            <div class="textura-grid">
-              <button class="textura-chip positive" onclick="setTextura('Sedoso')">Sedoso</button>
-              <button class="textura-chip positive" onclick="setTextura('Aterciopelado')">Aterciopelado</button>
-              <button class="textura-chip positive" onclick="setTextura('Cremoso')">Cremoso</button>
-              <button class="textura-chip negative" onclick="setTextura('Áspero')">Áspero</button>
-              <button class="textura-chip negative" onclick="setTextura('Astringente')">Astringente</button>
-              <button class="textura-chip negative" onclick="setTextura('Seco')">Seco</button>
-              <button class="textura-chip negative" onclick="setTextura('Acuoso')">Acuoso</button>
-              <button class="textura-chip negative" onclick="setTextura('Corrosivo')">Corrosivo</button>
-              <button class="textura-chip negative" onclick="setTextura('Arenoso')">Arenoso</button>
-            </div>
+            <div id="textura-seg-host"></div>
           </div>
         </div>
       </div>
@@ -1328,11 +1324,11 @@ body { background: var(--bg); color: var(--ink); font-family: 'Instrument Sans',
                     <button class="scale-btn" onclick="setCataScale('cuerpo',3)">3</button>
                   </div>
                 </div>
-                <div class="scale-item" style="flex:2">
-                  <label>Textura</label>
-                  <input class="input-field" id="cata-textura" type="text" placeholder="ej. sedoso, áspero" style="width:100%">
-                </div>
               </div>
+            </div>
+            <div>
+              <span class="form-label">Textura en lengua</span>
+              <div id="cata-textura-seg-host"></div>
             </div>
             <div>
               <span class="form-label">Notas (opcional)</span>
@@ -1681,9 +1677,23 @@ function setScale(dim, val) {
   document.querySelectorAll(`#scale-${dim} .scale-btn`).forEach(b=>{ b.classList.toggle('selected', parseInt(b.dataset.val)===val); });
   updateDiagnostico();
 }
+// Texturas ordenadas de muy malo (izquierda) a muy bueno (derecha).
+const TEXTURA_ESCALA = ['Corrosivo','Seco','Arenoso','Acuoso','Astringente','Áspero','Cremoso','Aterciopelado','Sedoso'];
+const TEXTURA_COLORES = ['#8B2020','#A63A1F','#C8521A','#D17A2A','#B8962E','#9A9F3E','#6E9B4A','#4F8A4A','#3A6B3E'];
+function texturaSegHTML(group, selected, handler) {
+  return `<div class="tex-seg" id="${group}">
+    <div class="tex-seg-ends"><span>◀ Muy malo</span><span>Muy bueno ▶</span></div>
+    <div class="tex-seg-row">
+      ${TEXTURA_ESCALA.map((t,i)=>`<button type="button" class="tex-seg-btn${selected===t?' selected':''}" data-t="${t}" style="--c:${TEXTURA_COLORES[i]}" onclick="${handler}('${t}')"><span class="tex-seg-bar"></span><span class="tex-seg-name">${t}</span></button>`).join('')}
+    </div>
+  </div>`;
+}
+function texturaSegSelect(group, selected) {
+  document.querySelectorAll('#'+group+' .tex-seg-btn').forEach(b => b.classList.toggle('selected', b.dataset.t === selected));
+}
 function setTextura(t) {
   state.form.textura = state.form.textura===t ? null : t;
-  document.querySelectorAll('.textura-chip').forEach(c=>{ c.classList.toggle('selected', c.textContent===t); });
+  texturaSegSelect('textura-seg', state.form.textura);
   updateDiagnostico();
 }
 function setCurva(c) {
@@ -2096,7 +2106,7 @@ async function guardarShot() {
 function resetForm() {
   state.form = {acidez:0,dulzor:0,posgusto:0,cuerpo:0,textura:null,curva:null};
   document.querySelectorAll('.scale-btn').forEach(b=>b.classList.remove('selected'));
-  document.querySelectorAll('.textura-chip').forEach(c=>c.classList.remove('selected'));
+  texturaSegSelect('textura-seg', null);
   document.querySelectorAll('.curva-btn').forEach(b=>b.classList.remove('selected'));
   ['inp-molienda','inp-rendimiento','inp-tiempo','inp-tds','inp-extraccion','inp-flow','inp-decision','inp-comentario','inp-temp','inp-presion','inp-reposo'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
   updateRatioDisplay();
@@ -2347,8 +2357,6 @@ function versionCard(v, isOriginal) {
 
 // ══ EDITAR SHOT CERRADO ══
 let editForm = null;
-const TEXTURAS_POS = ['Sedoso','Aterciopelado','Cremoso'];
-const TEXTURAS_NEG = ['Áspero','Astringente','Seco','Acuoso','Corrosivo','Arenoso'];
 
 function openEditShotForm(id) {
   const s = state.shots.find(x=>x.id===id);
@@ -2391,10 +2399,7 @@ function openEditShotForm(id) {
       <button class="curva-btn${editForm.curva==='invertida'?' selected':''}" id="edit-curva-invertida" onclick="setEditCurva('invertida')">Invertida</button>
     </div>
     <div class="form-label">Textura en lengua</div>
-    <div id="edit-textura-group" class="textura-grid" style="margin-bottom:1rem">
-      ${TEXTURAS_POS.map(t=>`<button class="textura-chip positive${editForm.textura===t?' selected':''}" onclick="setEditTextura('${t}')">${t}</button>`).join('')}
-      ${TEXTURAS_NEG.map(t=>`<button class="textura-chip negative${editForm.textura===t?' selected':''}" onclick="setEditTextura('${t}')">${t}</button>`).join('')}
-    </div>
+    <div style="margin-bottom:1rem">${texturaSegHTML('edit-textura-seg', editForm.textura, 'setEditTextura')}</div>
     <div class="form-label">Decisión</div>
     <input class="input-field" id="edit-decision" type="text" style="width:100%;margin-bottom:0.75rem" value="${(s.decision||'').replace(/"/g,'&quot;')}">
     <div class="form-label">Comentario libre</div>
@@ -2431,9 +2436,7 @@ function setEditCurva(val) {
 }
 function setEditTextura(val) {
   editForm.textura = editForm.textura===val ? null : val;
-  document.querySelectorAll('#edit-textura-group .textura-chip').forEach(b=>{
-    b.classList.toggle('selected', b.textContent===editForm.textura);
-  });
+  texturaSegSelect('edit-textura-seg', editForm.textura);
 }
 async function saveEditedShot() {
   const s = state.shots.find(x=>x.id===editForm.shotId);
@@ -3275,6 +3278,11 @@ function getWeekKey() {
   return d.getFullYear() + '-W' + week;
 }
 
+function setCataTextura(t) {
+  cataForm.textura = cataForm.textura === t ? '' : t;
+  texturaSegSelect('cata-textura-seg', cataForm.textura);
+}
+
 function setCataScale(dim, val) {
   cataForm[dim] = val;
   document.querySelectorAll('#cata-scale-' + dim + ' .scale-btn').forEach(b => {
@@ -3416,7 +3424,9 @@ function editarCata() {
         b.classList.toggle('selected', parseInt(b.textContent) === cataForm[dim]);
       });
     });
-    document.getElementById('cata-textura').value = cata.textura || '';
+    // Si la textura guardada es texto libre (cata vieja), se conserva tal cual hasta que se elija un segmento.
+    cataForm.textura = cata.textura || '';
+    texturaSegSelect('cata-textura-seg', cataForm.textura);
     document.getElementById('cata-notas').value = cata.notas || '';
   }
   document.getElementById('cata-existente').style.display='none';
@@ -3440,7 +3450,7 @@ async function guardarCata() {
     dulzor: cataForm.dulzor,
     posgusto: cataForm.posgusto,
     cuerpo: cataForm.cuerpo,
-    textura: document.getElementById('cata-textura').value,
+    textura: cataForm.textura,
     notas: document.getElementById('cata-notas').value
   };
   const c = state.catas[key];
@@ -3454,7 +3464,7 @@ async function guardarCata() {
   // Reset form
   cataForm = { acidez:0, dulzor:0, posgusto:0, cuerpo:0, textura:'', notas:'' };
   document.querySelectorAll('[id^="cata-scale"] .scale-btn').forEach(b=>b.classList.remove('selected'));
-  document.getElementById('cata-textura').value='';
+  texturaSegSelect('cata-textura-seg', null);
   document.getElementById('cata-notas').value='';
   renderCata();
 }
@@ -3500,6 +3510,8 @@ async function exportExcel() {
 }
 
 updateFlowIndicador();
+document.getElementById('textura-seg-host').innerHTML = texturaSegHTML('textura-seg', null, 'setTextura');
+document.getElementById('cata-textura-seg-host').innerHTML = texturaSegHTML('cata-textura-seg', null, 'setCataTextura');
 </script>
 
 <!-- ══ MODAL: CLIMA ══ -->
